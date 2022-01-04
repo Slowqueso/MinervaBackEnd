@@ -1,0 +1,30 @@
+{
+  "name": "minerva_-backend",
+  "version": "1.0.0",
+  "description": "Server Side Back-end",
+  "main": "server.js",
+  "type":"module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run dev",
+    "dev": "nodemon server",
+    "build": ""
+  },
+  "author": "Slowqueso",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.1.4",
+    "multer": "^1.4.4",
+    "nodemailer": "^6.7.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

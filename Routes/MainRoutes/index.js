@@ -17,10 +17,8 @@ router.use(cors());
 // Custom Middlewares
 
 //DB Config
-const conn = mongoose.connect(process.env.DB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+connectToMongoDB();
+
 //API Endpoints
 
 router.post("/", async (req, res) => {

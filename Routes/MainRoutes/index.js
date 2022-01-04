@@ -36,7 +36,6 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", (req, res) => {
-  console.log("Gay");
   TestModel.find()
     .then((test) => {
       res.status(200).json(test);

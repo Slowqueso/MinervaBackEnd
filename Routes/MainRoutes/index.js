@@ -44,5 +44,3 @@ router.get("/", (req, res) => {
 });
 
 export default router;
-
-//This is not a comment

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const UserScehma = mongoose.Schema({
   wallet_ID: [
@@ -56,7 +55,7 @@ const UserScehma = mongoose.Schema({
   ],
   login_device: [],
   previous_login_date: {
-    type: String,
+    type: Date,
     default: Date.now,
   },
   activities_participated_in: [
@@ -83,17 +82,5 @@ const UserScehma = mongoose.Schema({
     default: 0,
   },
 });
-
-// UserScehma.methods.matchPassword = async (enteredPassword) => {
-//   return await bcrypt.compare(enteredPassword, this.password);
-// };
-
-// UserScehma.pre("save", async (next) => {
-//   if (!this.isModified("password")) {
-//     next();
-//   }
-//   const salt = await bcrypt.genSalt(10);
-//   this.password = await bcrypt.hash(this.password, salt);
-// });
 
 export default mongoose.model("WebUser", UserScehma);

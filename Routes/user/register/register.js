@@ -24,16 +24,18 @@ Router.post("/register", async (req, res) => {
     !lname ||
     !contact
   ) {
-    res.status(400).json({ msg: "All fields are not entered" });
+    return res.status(400).json({ msg: "All fields are not entered" });
   } else {
     if (isEmailCorrect(email) && isContactCorrect(contact)) {
-      res.status(400).json({ msg: "Make sure Email and Contact are right!" });
+      return res
+        .status(400)
+        .json({ msg: "Make sure Email and Contact are right!" });
     } else {
       const userExist1 = await UserSchema.findOne({ email });
       const userExist2 = await UserSchema.findOne({ contact_number: contact });
 
       if (userExist1 || userExist2) {
-        res.status(400).json({ msg: "User Already Exists" });
+        return res.status(400).json({ msg: "User Already Exists" });
       }
 
       let newPassword;
@@ -53,19 +55,17 @@ Router.post("/register", async (req, res) => {
             async (err, user) => {
               if (err) {
                 console.log(err);
-                res
+                return res
                   .status(500)
                   .json({ msg: "Some Error Occured, Please Try again later!" });
               }
               if (user) {
                 const token = generateToken(user._id);
-                res.status(201).json({ token: token });
+                return res.status(201).json({ token: token });
               } else {
-                res
-                  .status(400)
-                  .json({
-                    msg: "Something Went Wrong, Please try again later",
-                  });
+                res.status(400).json({
+                  msg: "Something Went Wrong, Please try again later",
+                });
               }
             }
           );

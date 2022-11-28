@@ -35,6 +35,7 @@ Router.get("/get-all", async (req, res) => {
 
 Router.get("/get-one", async (req, res) => {
   const activityId = req.headers["x-activity-id"];
+  console.log(activityId);
   try {
     const activity = await ActivitySchema.findOne({ _id: activityId });
     if (activity) {

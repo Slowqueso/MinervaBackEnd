@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap");
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0px;
+        }
+
+
+        body {
+            display: flex;
+            align-items: center;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        section {
+            margin: auto;
+            max-width: 750px;
+            width: fit-content;
+            padding: 2rem;
+            background-color: #1c1c1c;
+        }
+
+        .title {
+            margin: 0px;
+            font-family: 'Cinzel', serif;
+            font-size: 30px;
+            font-weight: 200;
+            background: linear-gradient(90deg, #D47AFF -22%, #FF78BD 1.66%, #FFFBFC 41.22%, #FF79E2 50.33%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        .sub-title {
+            font-weight: 400;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 2rem;
+        }
+
+        .flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .wrapper {
+            width: 100%;
+            /* justify-content: space-between; */
+        }
+
+        .activity-logo {
+            width: 10em;
+            height: 10em;
+            margin-right: 3rem;
+            border-radius: 100%;
+            object-fit: fill;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .label {
+            margin: 1.5rem 0rem;
+            min-width: 20ch;
+        }
+
+        .label>.label-title {
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 1200;
+            font-size: 10px;
+            color: #727272;
+            margin: 0px;
+        }
+
+        .label>.label-title::before {
+            content: "# ";
+        }
+
+        .label>.label-text {
+            font-size: 16px;
+            color: white;
+            font-family: "Poppins", sans-serif;
+            font-weight: 300;
+            margin: 0px;
+        }
+
+        p.footr {
+            font-family: 'Poppins', sans-serif;
+            color: #e2e2e2;
+            font-weight: 100;
+            font-size: 14px;
+            font-size: 11px;
+            color: #8e8e8e;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <h1 class="title">Minerva</h1>
+        <h3 class="sub-title">A new Activity was added to your Inbox on 05-11-2022.</h3>
+        <div>
+            <div class="flex wrapper">
+                <div style="width: 100%;">
+                    <div class="flex">
+                        <div class="label">
+                            <h4 class="label-title">title</h4>
+                            <h3 class="label-text">{{activity-title}}</h3>
+                        </div>
+                        <div class="label">
+                            <h4 class="label-title">member limit</h4>
+                            <h3 class="label-text">{{member-limit}}</h3>
+                        </div>
+                        <div class="label">
+                            <h4 class="label-title">joining price</h4>
+                            <h3 class="label-text">{{joining-price}}</h3>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="label">
+                            <h4 class="label-title">difficulty level</h4>
+                            <h3 class="label-text">{{difficulty-level}}</h3>
+                        </div>
+                        <div class="label">
+                            <h4 class="label-title">date created</h4>
+                            <h3 class="label-text">{{date-created}}</h3>
+                        </div>
+                        <div class="label">
+                            <h4 class="label-title">duration period</h4>
+                            <h3 class="label-text">{{duration-period}}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="label">
+                <h4 class="label-title">description</h4>
+                <h3 class="label-text">{{activity-desc}}</h3>
+            </div>
+        </div>
+        <p class="footr">This message was sent to {{email}}. If you have any complaints, please Contact Us in our
+            Website. Do not reply to this Email as it is Auto-Generated</p>
+    </section>
+</body>
+
+</html>

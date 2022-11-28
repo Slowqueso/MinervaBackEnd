@@ -5,6 +5,10 @@ import UserSchema from "../../../models/UserSchema.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import nodemailer from "nodemailer";
+
+import hbs from "nodemailer-express-handlebars";
+
 const __dirname = path.resolve(path.dirname(""));
 
 const storage = multer.diskStorage({
@@ -36,7 +40,7 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const { id } = decoded;
-    const user = await UserSchema.updateOne(
+    const user = await UserSchema.findOneAndUpdate(
       { _id: id },
       {
         $set: {
@@ -55,7 +59,44 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
         },
       }
     );
-    res.status(204).json({ msg: "User Information Added!" });
+    async function main() {
+      let transporter = nodemailer.createTransport({
+        service: "Gmail",
+        secure: false,
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD_MAIL,
+        },
+      });
+      const handlebarOptions = {
+        viewEngine: {
+          partialsDir: path.resolve("./views/"),
+          defaultLayout: false,
+        },
+        viewPath: path.resolve("./views/"),
+      };
+      transporter.use("compile", hbs(handlebarOptions));
+      const mailOptions = {
+        from: `"Minerva" <${process.env.EMAIL}>`, // sender address
+        to: `${user.email}`,
+        subject: "Welcome to Minerva!",
+        template: "welcome",
+        context: {
+          username: user.username,
+          email: user.email,
+        },
+      };
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          return res.status(500);
+        }
+      });
+    }
+    main()
+      .then((response) => {
+        return res.status(204).json({ msg: "User Information Added!" });
+      })
+      .catch(console.error);
   } catch (err) {
     console.log(err);
     res.status(400).json({ msg: "Some Error Occured" });

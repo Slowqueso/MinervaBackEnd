@@ -10,6 +10,9 @@ import path from "path";
 const __dirname = path.resolve(path.dirname(""));
 import isLevelValid from "../../../utils/LevelValidator.js";
 import isPriceValid from "../../../utils/PriceValidator.js";
+import nodemailer from "nodemailer";
+import getOrderedDate from "../../../utils/dateParser.js";
+import hbs from "nodemailer-express-handlebars";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -18,10 +21,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(
       null,
-      Date.now().toString() +
-        file.originalname.split(".")[0] +
-        "." +
-        file.originalname.split(".").pop()
+      file.originalname.split(".")[0] + "." + file.originalname.split(".").pop()
     );
   },
 });
@@ -37,8 +37,8 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 Router.get("/drafts/get-activity/:activityId", async (req, res) => {
   const id = req.params.activityId;
   const token = req.headers["x-access-token"];
-  const activity = await ActivitySchema.findOne({ _id: id });
   try {
+    const activity = await ActivitySchema.findOne({ _id: id });
     const decoded = jwt.decode(token, process.env.SECRET_KEY);
     const { id: userID } = decoded;
     if (activity && activity._status < 4) {
@@ -68,12 +68,18 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
       }
     } else {
       return res.status(404).json({
+        status: "error",
         msg: "Incorrect ID! Please ensure your Activity is still in drafting stage!",
       });
     }
   } catch (error) {
-    return res.status(404).json({ msg: "Server Error" });
+    if (error) {
+      return res
+        .status(404)
+        .json({ status: "error", msg: "Error 404: Not Found!" });
+    }
   }
+  return res.status(500).json({ status: "error", msg: "Server Error" });
 });
 Router.post(
   "/create-activity/create-draft",
@@ -118,13 +124,6 @@ Router.post(
                 ),
                 contentType: req.file.mimetype,
               },
-              members: [
-                {
-                  id: user._id,
-                  address: address,
-                  username: user.username,
-                },
-              ],
               member_limit: memberLimit,
               _status: 1,
               difficulty_level: selectedLevel,
@@ -141,6 +140,51 @@ Router.post(
               }
               if (activity) {
                 fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+                async function main() {
+                  let transporter = nodemailer.createTransport({
+                    service: "Gmail",
+                    secure: false,
+                    auth: {
+                      user: process.env.EMAIL,
+                      pass: process.env.PASSWORD_MAIL,
+                    },
+                  });
+                  const handlebarOptions = {
+                    viewEngine: {
+                      partialsDir: path.resolve("./views/"),
+                      defaultLayout: false,
+                    },
+                    viewPath: path.resolve("./views/"),
+                  };
+                  transporter.use("compile", hbs(handlebarOptions));
+                  const mailOptions = {
+                    from: `"Minerva" <${process.env.EMAIL}>`, // sender address
+                    to: `${user.email}`,
+                    subject: "New Activity Draft has been created :D",
+                    template: "ActivityDraft",
+                    context: {
+                      date_created: getOrderedDate(activity.date_created),
+                      activity_title: activity.activity_title,
+                      activity_desc: activity.activity_desc,
+                      activity_logo: `data:image/${
+                        activity.activity_logo.contentType
+                      };base64,${activity.activity_logo.data.toString(
+                        "base64"
+                      )}`,
+                      member_limit: activity.member_limit,
+                      joining_price: activity.join_price,
+                      difficulty_level: activity.difficulty_level,
+                      duration_period: activity.duration_period,
+                      email: user.email,
+                    },
+                  };
+                  transporter.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                      return res.status(500);
+                    }
+                  });
+                }
+                await main();
                 return res
                   .status(201)
                   .json({ draftSaved: true, _id: activity._id });

@@ -11,19 +11,32 @@ Router.get("/info", async (req, res) => {
     if (id) {
       const user = await UserSchema.findOne({ _id: id });
       if (user) {
-        res.status(200).json({
-          authenticated: true,
-          user: {
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            credit_score: user.credit_score,
-            profile_pic: `data:image/${
-              user.profile_pic.contentType
-            };base64,${user.profile_pic.data.toString("base64")}`,
-            address: user.address,
-          },
-        });
+        if (user.profile_pic.data && user.profile_pic.contentType) {
+          return res.status(200).json({
+            authenticated: true,
+            user: {
+              id: user._id,
+              username: user.username,
+              email: user.email,
+              credit_score: user.credit_score,
+              profile_pic: `data:image/${
+                user.profile_pic.contentType
+              };base64,${user.profile_pic.data.toString("base64")}`,
+              address: user.address,
+            },
+          });
+        } else {
+          return res.status(200).json({
+            authenticated: true,
+            user: {
+              id: user._id,
+              username: user.username,
+              email: user.email,
+              credit_score: user.credit_score,
+              address: user.address,
+            },
+          });
+        }
       } else {
         res.status(400).json({ authenticated: false });
       }

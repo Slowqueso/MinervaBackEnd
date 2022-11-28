@@ -35,11 +35,9 @@ const ActivitySchema = mongoose.Schema({
     {
       id: {
         type: String,
-        unique: true,
       },
       address: {
         type: String,
-        unique: true,
       },
       username: String,
       date_of_join: {

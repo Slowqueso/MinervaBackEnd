@@ -129,6 +129,13 @@ Router.post(
               difficulty_level: selectedLevel,
               duration_period: durationPeriod,
               join_price: joinPrice,
+              members: [
+                {
+                  id: user._id,
+                  address: address,
+                  username: user.username,
+                },
+              ],
             },
             async (err, activity) => {
               if (err) {
@@ -185,10 +192,12 @@ Router.post(
                   });
                 }
                 await main();
+                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 return res
                   .status(201)
                   .json({ draftSaved: true, _id: activity._id });
               } else {
+                fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 return res.status(400).json({
                   status: "error",
                   msg: "Something Went Wrong, Please try again later",

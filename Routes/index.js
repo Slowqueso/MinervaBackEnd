@@ -1,9 +1,7 @@
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import connectToMongoDB from "../configs/mongo_connection.js";
-import TestModel from "../models/TestModel.js";
 import Register from "./user/register/register.js";
 import Information from "./user/register/secondaryProfile.js";
 import Authenticate from "./user/authenticate/authenticate.js";
@@ -24,6 +22,7 @@ const router = express.Router();
 // Third Party Middlewares
 router.use(express.json());
 router.use(cors());
+router.use("/activity-uploads", express.static("activity-uploads"));
 
 // Custom Middlewares
 

@@ -47,6 +47,7 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
         return res.status(200).json({
           status: "success",
           activity: {
+            id: activity._id,
             title: activity.activity_title,
             description: activity.activity_desc,
             categories: activity.category_tags,
@@ -81,6 +82,7 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
   }
   return res.status(500).json({ status: "error", msg: "Server Error" });
 });
+
 Router.post(
   "/create-activity/create-draft",
   upload.single("activityLogo"),
@@ -129,6 +131,13 @@ Router.post(
               difficulty_level: selectedLevel,
               duration_period: durationPeriod,
               join_price: joinPrice,
+              members: [
+                {
+                  id: user._id,
+                  address: address,
+                  username: user.username,
+                },
+              ],
             },
             async (err, activity) => {
               if (err) {
@@ -226,8 +235,60 @@ Router.put("/upd-owner-address", async (req, res) => {
       return res.status(204);
     }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ status: "error", msg: "Error OCcured" });
   }
 });
+
+Router.post(
+  "/upd-activity/:activityId",
+  upload.single("activityLogo"),
+  async (req, res) => {
+    const id = req.params.activityId;
+    const objForUpdate = {};
+    if(req.body.title){ objForUpdate.activity_title = req.body.title; }
+    if(req.body.description){ objForUpdate.activity_desc = req.body.description; }
+    if(req.body.selectedLevel){ objForUpdate.difficulty_level = req.body.selectedLevel; }
+    if(req.body.memberLimit){ objForUpdate.member_limit = req.body.memberLimit; }
+    if(req.body.durationPeriod){ objForUpdate.duration_period = req.body.durationPeriod; }
+    if(req.body.joinPrice){ objForUpdate.join_price = req.body.joinPrice; }
+    if(req.body.categories){ objForUpdate.category_tags = req.body.categories; }
+    if(req.file){
+      objForUpdate.activity_logo = {
+            data: fs.readFileSync(
+              __dirname + "/activity-uploads/" + req.file.filename
+            ),
+            contentType: req.file.mimetype,
+          }
+    }
+
+    
+    try {
+      const activity = await ActivitySchema.findOne({ _id: id });
+      if (activity) {
+        const updatedActivity = await ActivitySchema.updateOne(
+          { _id: id },
+          {
+            $set: objForUpdate,
+            
+          }
+        );
+        if (updatedActivity) {
+          if(req.file){
+            fs.unlinkSync(__dirname + "/activity-uploads/" + req.file.filename);
+          }
+          return res.status(201).json({ draftSaved: true, _id: id });
+        } else {
+          return res
+            .status(500)
+            .json({ status: "error", msg: "Error Occured" });
+        }
+      }
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({ status: "error", msg: "Error OCcured" });
+    }
+  }
+);
 
 export default Router;

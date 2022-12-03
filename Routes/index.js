@@ -9,6 +9,7 @@ import Login from "./user/authenticate/login.js";
 import FetchUser from "./user/fetch/userFetch.js";
 import CreateDraft from "./activity/CreateActivity/CreateDraft.js";
 import IncrementActivity from "./activity/incrementStatus.js";
+
 import AddTerms from "./activity/AddTerms.js";
 import AddFields from "./activity/AddFields.js";
 import FetchActivities from "./activity/Fetch/FetchActivity.js";
@@ -39,6 +40,7 @@ router.use("/user", ResetPassword);
 
 router.use("/activity", CreateDraft);
 router.use("/activity", IncrementActivity);
+
 router.use("/activity", AddTerms);
 router.use("/activity", AddFields);
 router.use("/activity", FetchActivities);

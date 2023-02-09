@@ -202,10 +202,12 @@ Router.post(
                   });
                 }
                 await main();
+                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 return res
                   .status(201)
                   .json({ draftSaved: true, _id: activity._id });
               } else {
+                fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 return res.status(400).json({
                   status: "error",
                   msg: "Something Went Wrong, Please try again later",

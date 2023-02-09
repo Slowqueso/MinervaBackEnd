@@ -29,6 +29,8 @@ const ActivitySchema = mongoose.Schema({
     {
       fieldHeader: String,
       fieldDescription: String,
+      imageFile: String,
+      index: Number,
     },
   ],
   members: [

@@ -6,7 +6,6 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 import nodemailer from "nodemailer";
-
 import hbs from "nodemailer-express-handlebars";
 
 const __dirname = path.resolve(path.dirname(""));
@@ -94,10 +93,12 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
     }
     main()
       .then((response) => {
+        fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
         return res.status(204).json({ msg: "User Information Added!" });
       })
       .catch(console.error);
   } catch (err) {
+    fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
     console.log(err);
     res.status(400).json({ msg: "Some Error Occured" });
   }

@@ -3,6 +3,7 @@ const Router = express.Router();
 import ActivitySchema from "../../models/ActivitySchema.js";
 import UserSchema from "../../models/UserSchema.js";
 import jwt from "jsonwebtoken";
+import AddToParticipatedActivity from "../../utils/AddToParticipatedActivity.js";
 
 Router.put("/join-activity", async (req, res) => {
   const { activityId, registeredAddress, userId } = req.body;
@@ -13,7 +14,6 @@ Router.put("/join-activity", async (req, res) => {
       /**
        * Add credit score validation and push member into activity
        */
-      console.log(req.body);
       const activity = await ActivitySchema.updateOne(
         { _id: activityId },
         {
@@ -26,6 +26,7 @@ Router.put("/join-activity", async (req, res) => {
           },
         }
       );
+      AddToParticipatedActivity(activityId, userId, 2);
       return res.status(204).json({ msg: "Member Added!" });
     } else {
       return res

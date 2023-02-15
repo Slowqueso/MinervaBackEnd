@@ -13,6 +13,7 @@ import isPriceValid from "../../../utils/PriceValidator.js";
 import nodemailer from "nodemailer";
 import getOrderedDate from "../../../utils/dateParser.js";
 import hbs from "nodemailer-express-handlebars";
+import AddToParticipatedActivity from "../../../utils/AddToParticipatedActivity.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -148,6 +149,7 @@ Router.post(
                 });
               }
               if (activity) {
+                AddToParticipatedActivity(activity._id, user._id, 1);
                 fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 async function main() {
                   let transporter = nodemailer.createTransport({
@@ -248,23 +250,36 @@ Router.post(
   async (req, res) => {
     const id = req.params.activityId;
     const objForUpdate = {};
-    if(req.body.title){ objForUpdate.activity_title = req.body.title; }
-    if(req.body.description){ objForUpdate.activity_desc = req.body.description; }
-    if(req.body.selectedLevel){ objForUpdate.difficulty_level = req.body.selectedLevel; }
-    if(req.body.memberLimit){ objForUpdate.member_limit = req.body.memberLimit; }
-    if(req.body.durationPeriod){ objForUpdate.duration_period = req.body.durationPeriod; }
-    if(req.body.joinPrice){ objForUpdate.join_price = req.body.joinPrice; }
-    if(req.body.categories){ objForUpdate.category_tags = req.body.categories; }
-    if(req.file){
+    if (req.body.title) {
+      objForUpdate.activity_title = req.body.title;
+    }
+    if (req.body.description) {
+      objForUpdate.activity_desc = req.body.description;
+    }
+    if (req.body.selectedLevel) {
+      objForUpdate.difficulty_level = req.body.selectedLevel;
+    }
+    if (req.body.memberLimit) {
+      objForUpdate.member_limit = req.body.memberLimit;
+    }
+    if (req.body.durationPeriod) {
+      objForUpdate.duration_period = req.body.durationPeriod;
+    }
+    if (req.body.joinPrice) {
+      objForUpdate.join_price = req.body.joinPrice;
+    }
+    if (req.body.categories) {
+      objForUpdate.category_tags = req.body.categories;
+    }
+    if (req.file) {
       objForUpdate.activity_logo = {
-            data: fs.readFileSync(
-              __dirname + "/activity-uploads/" + req.file.filename
-            ),
-            contentType: req.file.mimetype,
-          }
+        data: fs.readFileSync(
+          __dirname + "/activity-uploads/" + req.file.filename
+        ),
+        contentType: req.file.mimetype,
+      };
     }
 
-    
     try {
       const activity = await ActivitySchema.findOne({ _id: id });
       if (activity) {
@@ -272,11 +287,10 @@ Router.post(
           { _id: id },
           {
             $set: objForUpdate,
-            
           }
         );
         if (updatedActivity) {
-          if(req.file){
+          if (req.file) {
             fs.unlinkSync(__dirname + "/activity-uploads/" + req.file.filename);
           }
           return res.status(201).json({ draftSaved: true, _id: id });
@@ -287,7 +301,7 @@ Router.post(
         }
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return res.status(500).json({ status: "error", msg: "Error OCcured" });
     }
   }

@@ -35,11 +35,10 @@ Router.get("/get-all", async (req, res) => {
 
 Router.get("/get-one", async (req, res) => {
   const activityId = req.headers["x-activity-id"];
-  console.log(activityId);
   try {
     const activity = await ActivitySchema.findOne({ _id: activityId });
     if (activity) {
-      const owner = UserSchema.findOne({ _id: activity.owner.ID });
+      const owner = await UserSchema.findOne({ _id: activity.owner.ID });
       return res.status(200).json({
         activity: {
           id: activity._id,
@@ -55,11 +54,22 @@ Router.get("/get-one", async (req, res) => {
           upVotes: activity.upvotes,
           date_created: activity.date_created,
           terms: activity.terms,
-          fields: activity.overview_contents,
+          fields: activity.overview_contents.sort(
+            (a, b) => parseInt(a.index) - parseInt(b.index)
+          ),
           duration_period: activity.duration_period,
           _status: activity._status,
           difficulty_level: activity.difficulty_level,
-          owner: activity.owner.ID,
+          owner: {
+            id: activity.owner.ID,
+            username: owner.username,
+            profile_pic:
+              owner.profile_pic.contentType && owner.profile_pic.data
+                ? `data:image/${
+                    owner.profile_pic.contentType
+                  };base64,${owner.profile_pic.data.toString("base64")}`
+                : null,
+          },
           username: owner.username,
           join_price: activity.join_price,
         },

@@ -105,7 +105,6 @@ Router.post(
       const { id } = decoded;
       if (id) {
         const user = await UserSchema.findOne({ _id: id });
-        console.log(selectedLevel, user.credit_score);
         if (user && isLevelValid(parseInt(selectedLevel), user.credit_score)) {
           if (!isPriceValid(parseInt(selectedLevel), parseInt(joinPrice))) {
             return res.status(500).json({
@@ -142,12 +141,20 @@ Router.post(
             },
             async (err, activity) => {
               if (err) {
-                console.log(err);
-                return res.status(500).json({
-                  status: "error",
-                  msg: "Some Error Occured, Please try again later!",
-                });
+                if (err.code === 11000) {
+                  return res.status(500).json({
+                    status: "error",
+                    msg: "Activity with same title already exists!",
+                  });
+                } else {
+                  console.log(err);
+                  return res.status(500).json({
+                    status: "error",
+                    msg: "Some Error Occured, Please try again later!",
+                  });
+                }
               }
+
               if (activity) {
                 AddToParticipatedActivity(activity._id, user._id, 1);
                 fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
@@ -248,7 +255,8 @@ Router.post(
   "/upd-activity/:activityId",
   upload.single("activityLogo"),
   async (req, res) => {
-    const id = req.params.activityId;
+    const activityId = req.params.activityId;
+    const token = req.headers["x-access-token"];
     const objForUpdate = {};
     if (req.body.title) {
       objForUpdate.activity_title = req.body.title;
@@ -281,23 +289,49 @@ Router.post(
     }
 
     try {
-      const activity = await ActivitySchema.findOne({ _id: id });
-      if (activity) {
-        const updatedActivity = await ActivitySchema.updateOne(
-          { _id: id },
-          {
-            $set: objForUpdate,
+      const activity = await ActivitySchema.findOne({ _id: activityId });
+      const decoded = jwt.decode(token, process.env.SECRET_KEY);
+      const { id } = decoded;
+
+      if (activity && id) {
+        const user = await UserSchema.findOne({ _id: id });
+
+        if (
+          user &&
+          isLevelValid(
+            parseInt(objForUpdate.difficulty_level),
+            user.credit_score
+          )
+        ) {
+          if (
+            !isPriceValid(
+              parseInt(objForUpdate.difficulty_level),
+              parseInt(objForUpdate.join_price)
+            )
+          ) {
+            return res.status(500).json({
+              msg: "ETH Limit Exceeded for the level!",
+              status: "error",
+            });
           }
-        );
-        if (updatedActivity) {
-          if (req.file) {
-            fs.unlinkSync(__dirname + "/activity-uploads/" + req.file.filename);
+          ActivitySchema.updateOne(
+            { _id: activityId },
+            {
+              $set: objForUpdate,
+            }
+          );
+          if (updatedActivity) {
+            if (req.file) {
+              fs.unlinkSync(
+                __dirname + "/activity-uploads/" + req.file.filename
+              );
+            }
+            return res.status(201).json({ draftSaved: true, _id: id });
+          } else {
+            return res
+              .status(500)
+              .json({ status: "error", msg: "Error Occured" });
           }
-          return res.status(201).json({ draftSaved: true, _id: id });
-        } else {
-          return res
-            .status(500)
-            .json({ status: "error", msg: "Error Occured" });
         }
       }
     } catch (error) {

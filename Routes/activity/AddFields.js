@@ -57,8 +57,10 @@ Router.put("/add-fields", async (req, res) => {
 });
 
 Router.post("/add-fields", upload.single("activityAsset"), async (req, res) => {
+  console.log("gay");
   const { header, description, activityId, index } = req.body;
   let path;
+  const { filename } = req.file;
   if (req.file) {
     path = req.file.path;
   }
@@ -70,7 +72,7 @@ Router.post("/add-fields", upload.single("activityAsset"), async (req, res) => {
           overview_contents: {
             fieldHeader: header,
             fieldDescription: description,
-            imageFile: path ? path : null,
+            imageFile: "activity-uploads/" + filename,
             index: index,
           },
         },

@@ -16,6 +16,7 @@ import FetchActivities from "./activity/Fetch/FetchActivity.js";
 import JoinActivity from "./activity/JoinActivity.js";
 import TwoFactor from "./TwoFactor/ResetPassword.js";
 import ResetPassword from "./user/PasswordReset/PasswordReset.js";
+import FetchUserActivity from "./activity/Fetch/FetchUserActivity.js";
 import AddProfile from "./user/profile/addProfile.js";
 
 dotenv.config();
@@ -47,6 +48,7 @@ router.use("/activity", AddTerms);
 router.use("/activity", AddFields);
 router.use("/activity", FetchActivities);
 router.use("/activity", JoinActivity);
+router.use("/activity", FetchUserActivity);
 
 router.use("/two-factor", TwoFactor);
 export default router;

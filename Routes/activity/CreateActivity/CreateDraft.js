@@ -13,6 +13,7 @@ import isPriceValid from "../../../utils/PriceValidator.js";
 import nodemailer from "nodemailer";
 import getOrderedDate from "../../../utils/dateParser.js";
 import hbs from "nodemailer-express-handlebars";
+import AddToParticipatedActivity from "../../../utils/AddToParticipatedActivity.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -139,23 +140,23 @@ Router.post(
               ],
             },
             async (err, activity) => {
-              
-              
               if (err) {
-                if(err.code === 11000){
+                if (err.code === 11000) {
                   return res.status(500).json({
                     status: "error",
                     msg: "Activity with same title already exists!",
                   });
+                } else {
+                  console.log(err);
+                  return res.status(500).json({
+                    status: "error",
+                    msg: "Some Error Occured, Please try again later!",
+                  });
                 }
-                else{console.log(err);
-                return res.status(500).json({
-                  status: "error",
-                  msg: "Some Error Occured, Please try again later!",
-                });}
               }
-              
+
               if (activity) {
+                AddToParticipatedActivity(activity._id, user._id, 1);
                 fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 async function main() {
                   let transporter = nodemailer.createTransport({
@@ -257,77 +258,85 @@ Router.post(
     const activityId = req.params.activityId;
     const token = req.headers["x-access-token"];
     const objForUpdate = {};
-    if(req.body.title){ objForUpdate.activity_title = req.body.title; }
-    if(req.body.description){ objForUpdate.activity_desc = req.body.description; }
-    if(req.body.selectedLevel){ objForUpdate.difficulty_level = req.body.selectedLevel; }
-    if(req.body.memberLimit){ objForUpdate.member_limit = req.body.memberLimit; }
-    if(req.body.durationPeriod){ objForUpdate.duration_period = req.body.durationPeriod; }
-    if(req.body.joinPrice){ objForUpdate.join_price = req.body.joinPrice; }
-    if(req.body.categories){ objForUpdate.category_tags = req.body.categories; }
-    if(req.file){
+    if (req.body.title) {
+      objForUpdate.activity_title = req.body.title;
+    }
+    if (req.body.description) {
+      objForUpdate.activity_desc = req.body.description;
+    }
+    if (req.body.selectedLevel) {
+      objForUpdate.difficulty_level = req.body.selectedLevel;
+    }
+    if (req.body.memberLimit) {
+      objForUpdate.member_limit = req.body.memberLimit;
+    }
+    if (req.body.durationPeriod) {
+      objForUpdate.duration_period = req.body.durationPeriod;
+    }
+    if (req.body.joinPrice) {
+      objForUpdate.join_price = req.body.joinPrice;
+    }
+    if (req.body.categories) {
+      objForUpdate.category_tags = req.body.categories;
+    }
+    if (req.file) {
       objForUpdate.activity_logo = {
-            data: fs.readFileSync(
-              __dirname + "/activity-uploads/" + req.file.filename
-            ),
-            contentType: req.file.mimetype,
-          }
+        data: fs.readFileSync(
+          __dirname + "/activity-uploads/" + req.file.filename
+        ),
+        contentType: req.file.mimetype,
+      };
     }
 
-    
     try {
       const activity = await ActivitySchema.findOne({ _id: activityId });
       const decoded = jwt.decode(token, process.env.SECRET_KEY);
       const { id } = decoded;
-      
+
       if (activity && id) {
         const user = await UserSchema.findOne({ _id: id });
 
-        if (user && isLevelValid(parseInt(objForUpdate.difficulty_level), user.credit_score)){
-          if (!isPriceValid(parseInt(objForUpdate.difficulty_level), parseInt(objForUpdate.join_price))) {
-          return res.status(500).json({
-            msg: "ETH Limit Exceeded for the level!",
-            status: "error",
-          });
-        }
-        ActivitySchema.updateOne(
-          { _id: activityId },
-          {
-            $set: objForUpdate,
-            
-          },
-          function(err, result) {
-            if(err){
-              if(err.code === 11000){
-              return res.status(500).json({
-                status: "error",
-                msg: "Activity with same title already exists!",
-                });
-              }else{
-                return res
+        if (
+          user &&
+          isLevelValid(
+            parseInt(objForUpdate.difficulty_level),
+            user.credit_score
+          )
+        ) {
+          if (
+            !isPriceValid(
+              parseInt(objForUpdate.difficulty_level),
+              parseInt(objForUpdate.join_price)
+            )
+          ) {
+            return res.status(500).json({
+              msg: "ETH Limit Exceeded for the level!",
+              status: "error",
+            });
+          }
+          ActivitySchema.updateOne(
+            { _id: activityId },
+            {
+              $set: objForUpdate,
+            }
+          );
+          if (updatedActivity) {
+            if (req.file) {
+              fs.unlinkSync(
+                __dirname + "/activity-uploads/" + req.file.filename
+              );
+            }
+            return res.status(201).json({ draftSaved: true, _id: id });
+          } else {
+            return res
               .status(500)
               .json({ status: "error", msg: "Error Occured" });
-              }
-            }
-            else{
-              if(req.file){
-                fs.unlinkSync(__dirname + "/activity-uploads/" + req.file.filename);
-              }
-              return res.status(201).json({ draftSaved: true, _id: activityId });
-            }
           }
-        )
-       
-      }
-      else {
-        return res
-          .status(400)
-          .json({ status: "error", msg: "Not Enough Credit Score" });
-      }
-
+        }
       }
     } catch (error) {
-      console.log(error)
-      // return res.status(500).json({ status: "error", msg: "Error OCcured" });
+      console.log(error);
+      return res.status(500).json({ status: "error", msg: "Error OCcured" });
     }
   }
 );

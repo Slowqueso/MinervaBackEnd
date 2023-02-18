@@ -60,7 +60,9 @@ const UserScehma = mongoose.Schema({
   },
   activities_participated_in: [
     {
-      activityID: Number,
+      activityID: String,
+      activity_role: Number,
+      activity_role_name: String,
     },
   ],
   recent_searches: [],

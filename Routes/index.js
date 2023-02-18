@@ -16,6 +16,7 @@ import FetchActivities from "./activity/Fetch/FetchActivity.js";
 import JoinActivity from "./activity/JoinActivity.js";
 import TwoFactor from "./TwoFactor/ResetPassword.js";
 import ResetPassword from "./user/PasswordReset/PasswordReset.js";
+import AddProfile from "./user/profile/addProfile.js";
 
 dotenv.config();
 const router = express.Router();
@@ -37,6 +38,7 @@ router.use("/user", Authenticate);
 router.use("/user", Login);
 router.use("/user", FetchUser);
 router.use("/user", ResetPassword);
+router.use("/user", AddProfile);
 
 router.use("/activity", CreateDraft);
 router.use("/activity", IncrementActivity);

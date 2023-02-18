@@ -81,6 +81,23 @@ const UserScehma = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  student_profile: {
+    name_of_institution: String,
+    student_email: String,
+    degree: String,
+    course_name: String,
+    course_duration: String,
+    field_of_study: String,
+    join_date: String,
+    grade: String,
+  },
+  job_profile: {
+    company_name: String,
+    job_designation: String,
+    location: String,
+    job_description: String,
+    qualifications: String,
+  },
 });
 
 export default mongoose.model("WebUser", UserScehma);

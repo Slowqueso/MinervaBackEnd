@@ -21,7 +21,7 @@ Router.put("/update-password", async (req, res) => {
           const user = await UserSchema.findOne({ email: email });
           const response = await UserSchema.findOneAndUpdate(
             { email },
-            { username: "Slow", password: newPassword }
+            { password: newPassword }
           );
           if (response) {
             async function main() {

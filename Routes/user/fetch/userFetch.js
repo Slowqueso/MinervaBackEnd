@@ -23,6 +23,7 @@ Router.get("/info", async (req, res) => {
                 user.profile_pic.contentType
               };base64,${user.profile_pic.data.toString("base64")}`,
               address: user.address,
+              occupation: user.occupation,
             },
           });
         } else {
@@ -34,6 +35,7 @@ Router.get("/info", async (req, res) => {
               email: user.email,
               credit_score: user.credit_score,
               address: user.address,
+              occupation: user.occupation,
             },
           });
         }

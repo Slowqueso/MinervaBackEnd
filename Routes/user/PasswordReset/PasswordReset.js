@@ -74,4 +74,79 @@ Router.put("/update-password", async (req, res) => {
   }
 });
 
+
+Router.post("/update-password-alt", async (req, res) => {
+  const token = req.headers["x-access-token"];
+  const { password, rePassword } = req.body;
+  try {
+    let newPassword, email,username;
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(password, salt, async (err, hash) => {
+        if (err) return res.status(500);
+        newPassword = hash;
+        const decoded = jwt.decode(token, process.env.SECRET_KEY);
+        const { id } = decoded;
+        if (id) {
+          UserSchema.findOne({ _id: id },{email:1,username:1}).then((user) => {
+            email = user.email;
+            username = user.username;
+          });
+          
+          const response = await UserSchema.findOneAndUpdate(
+            { _id: id },
+            { password: newPassword }
+          );
+          if (response) {
+            async function main() {
+              let transporter = nodemailer.createTransport({
+                service: "Gmail",
+                secure: false,
+                auth: {
+                  user: process.env.EMAIL,
+                  pass: process.env.PASSWORD_MAIL,
+                },
+              });
+              const handlebarOptions = {
+                viewEngine: {
+                  partialsDir: path.resolve("./views/"),
+                  defaultLayout: false,
+                },
+                viewPath: path.resolve("./views/"),
+              };
+              transporter.use("compile", hbs(handlebarOptions));
+              
+              const mailOptions = {
+                from: `"Minerva" <${process.env.EMAIL}>`, // sender address
+                to: `${email}`,
+                subject: "Password Changed!",
+                template: "resetPassword",
+                context: {
+                  username: username,
+                },
+              };
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  return res.status(500);
+                }
+              });
+            }
+            main()
+              .then((response) => { 
+                return res.status(201).json({ msg: "Updated Password" });
+              })
+              .catch(console.error);
+          }
+        } else {
+          return res.status(404).send("Error");
+        }
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("error");
+  }
+});
+
+
+
 export default Router;

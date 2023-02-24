@@ -7,6 +7,13 @@ import UserSchema from "../../models/UserSchema.js";
 import jwt from "jsonwebtoken";
 const Router = express.Router();
 
+const generateToken = (id) => {
+  const token = jwt.sign({ id }, process.env.SECRET_KEY, {
+    expiresIn: "30d",
+  });
+  return token;
+};
+
 /**
  * @dev - This Route sends OTP for Password Reset to the designated email.
  * Uses nodemailer and express handlebars for generating email templates located in views folder.
@@ -64,6 +71,62 @@ Router.post("/generate-otp", async (req, res) => {
   }
 });
 
+
+Router.post("/generate-otp-login", async (req, res) => {
+  const { email } = req.body;
+  const { otpToken, otp } = generateOtp(email);
+  try {
+    const user = await UserSchema.findOne({ email: email });
+    if (user) {
+      async function main() {
+        let transporter = nodemailer.createTransport({
+          service: "Gmail",
+          secure: false,
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD_MAIL,
+          },
+        });
+        const handlebarOptions = {
+          viewEngine: {
+            partialsDir: path.resolve("./views/"),
+            defaultLayout: false,
+          },
+          viewPath: path.resolve("./views/"),
+        };
+        transporter.use("compile", hbs(handlebarOptions));
+
+        const mailOptions = {
+          from: `"Minerva" <${process.env.EMAIL}>`, // sender address
+          to: `${email}`,
+          subject: "Login OTP!",
+          template: "loginotp",
+          context: {
+            username: user.username,
+            otp: otp,
+          },
+        };
+        transporter.sendMail(mailOptions, function (error, info) {
+          if (error) {
+            return res.status(500);
+          }
+        });
+      }
+      main()
+        .then((response) => {
+          res.status(200).json({ otpToken });
+        })
+        .catch(console.error);
+    } else {
+      return res.status(404).json({ msg: "User Not Found!" });
+    }
+  } catch (error) {
+    return res.status(500);
+  }
+});
+
+
+
 /**
  * @dev - Validates the Otp with the OTP token from client side.
  * Uses jwt to decode the otp Token.
@@ -72,11 +135,13 @@ Router.post("/check-otp", async (req, res) => {
   const { otp: userOtp, userId: otpToken } = req.body;
   try {
     const decoded = jwt.decode(otpToken, process.env.SECRET_KEY);
-    const { otp } = decoded;
+    const {email, otp } = decoded;
+    const user = await UserSchema.findOne({ email });
+    const token = generateToken(user._id);
     if (otp === parseInt(userOtp)) {
       return res
         .status(201)
-        .json({ authenticated: true, msg: "User verified!" });
+        .json({ authenticated: true,user: token, msg: "User verified!" });
     } else {
       return res
         .status(401)

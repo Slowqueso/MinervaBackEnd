@@ -19,7 +19,7 @@ Router.put("/login", async (req, res) => {
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (isPasswordValid) {
         const token = generateToken(user._id);
-        return res.json({ status: "ok", user: token });
+        return res.json({ status: "ok", user: token ,email_auth:user.email_auth});
       } else {
         return res
           .status(400)

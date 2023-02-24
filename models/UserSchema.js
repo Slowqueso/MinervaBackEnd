@@ -100,6 +100,10 @@ const UserScehma = mongoose.Schema({
     job_description: String,
     qualifications: String,
   },
+  email_auth: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export default mongoose.model("WebUser", UserScehma);

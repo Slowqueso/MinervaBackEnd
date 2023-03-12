@@ -93,12 +93,12 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
     }
     main()
       .then((response) => {
-        fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+        fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
         return res.status(204).json({ msg: "User Information Added!" });
       })
       .catch(console.error);
   } catch (err) {
-    fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+    fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
     console.log(err);
     res.status(400).json({ msg: "Some Error Occured" });
   }

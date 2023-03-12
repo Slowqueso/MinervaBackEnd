@@ -104,6 +104,26 @@ const UserScehma = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  rep:{
+    type: Number,
+  },
+  notifications: [
+    {
+      
+      // notification_type: Number,
+      notification_title: String,
+      notification_description: String,
+      notification_date: {
+        type: Date,
+        default: Date.now,
+      },
+      notification_read: {
+        type: Boolean,
+        default: false,
+      },
+    },
+  ],
+  
 });
 
 export default mongoose.model("WebUser", UserScehma);

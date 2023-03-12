@@ -314,7 +314,7 @@ Router.post(
               status: "error",
             });
           }
-          ActivitySchema.updateOne(
+          const updatedActivity= await ActivitySchema.updateOne(
             { _id: activityId },
             {
               $set: objForUpdate,

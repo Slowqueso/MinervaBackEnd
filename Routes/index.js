@@ -21,6 +21,11 @@ import AddProfile from "./user/profile/addProfile.js";
 import AddPublicId from "./activity/CreateActivity/AddPublicId.js";
 import Donate from "./activity/DonateToActivity/Donate.js";
 import DeleteUser from "./user/Delete/DeleteUser.js";
+import Views from "./activity/Interactions/Views.js";
+import Upvotes from "./activity/Interactions/Upvotes.js";
+import JoinResquest from "./activity/Interactions/JoinRequest.js";
+import Comments from "./activity/Interactions/Comments.js";
+import Donations from "./activity/Interactions/Donations.js";
 
 dotenv.config();
 const router = express.Router();
@@ -55,6 +60,11 @@ router.use("/activity", JoinActivity);
 router.use("/activity", FetchUserActivity);
 router.use("/activity", AddPublicId);
 router.use("/activity", Donate);
+router.use("/activity", Views);
+router.use("/activity", Upvotes);
+router.use("/activity", JoinResquest);
+router.use("/activity", Comments);
+router.use("/activity", Donations);
 
 router.use("/two-factor", TwoFactor);
 export default router;

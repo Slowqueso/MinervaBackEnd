@@ -78,10 +78,17 @@ const ActivitySchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  upvotes: {
-    type: Number,
-    default: 0,
-  },
+  upvotes: [
+    {
+      _id: false,
+      user_id: {
+        type: String,
+      },
+      time: {
+        type: Date,
+      },
+    },
+  ],
   difficulty_level: {
     type: Number,
     required: true,
@@ -101,6 +108,62 @@ const ActivitySchema = mongoose.Schema({
       date: {
         type: Date,
         default: Date.now,
+      },
+    },
+  ],
+  views: [
+    {
+      _id: false,
+      user_id: {
+        type: String,
+      },
+      time: {
+        type: Date,
+      },
+    },
+  ],
+  comments: [
+    {
+      user_id: {
+        type: String,
+      },
+      username: {
+        type: String,
+      },
+      comment: {
+        type: String,
+      },
+      time: {
+        type: Date,
+      },
+    },
+  ],
+  join_requests: [
+    {
+      _id: false,
+      user_id: {
+        type: String,
+      },
+      name: {
+        type: String,
+      },
+      rep: {
+        type: Number,
+      },
+      profile_pic: {
+        data: Buffer,
+        contentType: String,
+      },
+    },
+  ],
+  join_accepted: [
+    {
+      _id: false,
+      user_id: {
+        type: String,
+      },
+      time: {
+        type: Date,
       },
     },
   ],

@@ -1,15 +1,17 @@
 import mongoose from "mongoose";
 
 const UserScehma = mongoose.Schema({
-  wallet_ID: [
-    {
-      _address: String,
-      _date: {
-        type: String,
-        default: Date.now,
-      },
+  wallet_ID: {
+    _address: String,
+    _date: {
+      type: Date,
+      default: Date.now,
     },
-  ],
+  },
+  public_ID: {
+    unique: true,
+    type: Number,
+  },
   email: {
     type: String,
     required: true,

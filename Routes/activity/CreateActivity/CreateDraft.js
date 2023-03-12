@@ -233,7 +233,7 @@ Router.post(
 Router.put("/upd-owner-address", async (req, res) => {
   const { activityId, account } = req.body;
   try {
-    console.log(activityId);
+    // console.log(activityId);
     const activity = await ActivitySchema.updateOne(
       { _id: activityId },
       {
@@ -314,7 +314,7 @@ Router.post(
               status: "error",
             });
           }
-          ActivitySchema.updateOne(
+          const updatedActivity = await ActivitySchema.updateOne(
             { _id: activityId },
             {
               $set: objForUpdate,
@@ -326,7 +326,7 @@ Router.post(
                 __dirname + "/activity-uploads/" + req.file.filename
               );
             }
-            return res.status(201).json({ draftSaved: true, _id: id });
+            return res.status(201).json({ draftSaved: true, _id: activityId });
           } else {
             return res
               .status(500)

@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const ActivitySchema = mongoose.Schema({
+  public_ID: {
+    type: Number,
+    unique: true,
+  },
   owner: {
     ID: {
       type: String,
@@ -86,6 +90,20 @@ const ActivitySchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  donations: [
+    {
+      from: {
+        type: String,
+      },
+      amountInUSD: {
+        type: Number,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 export default mongoose.model("Activities", ActivitySchema);

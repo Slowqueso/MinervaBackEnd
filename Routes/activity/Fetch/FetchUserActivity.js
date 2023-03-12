@@ -25,6 +25,7 @@ Router.get("/get-user-activities", async (req, res) => {
         activity_title: 1,
         _id: 1,
         activity_logo: 1,
+        public_ID: 1,
       }
     );
 
@@ -32,16 +33,17 @@ Router.get("/get-user-activities", async (req, res) => {
       return {
         id: activity._id,
         title: activity.activity_title,
+        public_ID: activity.public_ID,
         activity_logo: `data:image/${
           activity.activity_logo.contentType
         };base64,${activity.activity_logo.data.toString("base64")}`,
         role: activities_participated_in[index].activity_role,
       };
     });
-    res.json({ activities: Activities }).status(200);
+    return res.json({ activities: Activities }).status(200);
   } catch (error) {
     console.log(error);
-    res
+    return res
       .json({ msg: "Error 404: Some Problem Occured, Try again later!" })
       .status(404);
   }

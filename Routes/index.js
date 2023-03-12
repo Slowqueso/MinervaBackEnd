@@ -18,6 +18,9 @@ import TwoFactor from "./TwoFactor/ResetPassword.js";
 import ResetPassword from "./user/PasswordReset/PasswordReset.js";
 import FetchUserActivity from "./activity/Fetch/FetchUserActivity.js";
 import AddProfile from "./user/profile/addProfile.js";
+import AddPublicId from "./activity/CreateActivity/AddPublicId.js";
+import Donate from "./activity/DonateToActivity/Donate.js";
+import DeleteUser from "./user/Delete/DeleteUser.js";
 
 dotenv.config();
 const router = express.Router();
@@ -40,6 +43,7 @@ router.use("/user", Login);
 router.use("/user", FetchUser);
 router.use("/user", ResetPassword);
 router.use("/user", AddProfile);
+router.use("/user", DeleteUser);
 
 router.use("/activity", CreateDraft);
 router.use("/activity", IncrementActivity);
@@ -49,6 +53,8 @@ router.use("/activity", AddFields);
 router.use("/activity", FetchActivities);
 router.use("/activity", JoinActivity);
 router.use("/activity", FetchUserActivity);
+router.use("/activity", AddPublicId);
+router.use("/activity", Donate);
 
 router.use("/two-factor", TwoFactor);
 export default router;

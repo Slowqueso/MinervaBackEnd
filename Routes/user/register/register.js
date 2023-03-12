@@ -13,7 +13,16 @@ const generateToken = (id) => {
 };
 
 Router.post("/register", async (req, res) => {
-  const { email, password, username, fname, lname, contact } = req.body;
+  const {
+    email,
+    password,
+    username,
+    fname,
+    lname,
+    contact,
+    walletAddress,
+    public_ID,
+  } = req.body;
   if (
     !email ||
     email === "" ||
@@ -22,7 +31,7 @@ Router.post("/register", async (req, res) => {
     !username ||
     !fname ||
     !lname ||
-    !contact
+    !walletAddress
   ) {
     return res.status(400).json({ msg: "All fields are not entered" });
   } else {
@@ -33,8 +42,11 @@ Router.post("/register", async (req, res) => {
     } else {
       const userExist1 = await UserSchema.findOne({ email });
       const userExist2 = await UserSchema.findOne({ contact_number: contact });
+      const userExist3 = await UserSchema.findOne({
+        wallet_ID: { _address: walletAddress },
+      });
 
-      if (userExist1 || userExist2) {
+      if (userExist1 || userExist2 || userExist3) {
         return res.status(400).json({ msg: "User Already Exists" });
       }
 
@@ -51,6 +63,10 @@ Router.post("/register", async (req, res) => {
               username,
               first_name: fname,
               last_name: lname,
+              wallet_ID: {
+                _address: walletAddress,
+              },
+              public_ID,
             },
             async (err, user) => {
               if (err) {
@@ -61,7 +77,7 @@ Router.post("/register", async (req, res) => {
               }
               if (user) {
                 const token = generateToken(user._id);
-                return res.status(201).json({ token: token });
+                return res.status(201).json({ token: token, uid: user._id });
               } else {
                 res.status(400).json({
                   msg: "Something Went Wrong, Please try again later",

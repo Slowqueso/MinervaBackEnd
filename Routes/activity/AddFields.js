@@ -57,7 +57,6 @@ Router.put("/add-fields", async (req, res) => {
 });
 
 Router.post("/add-fields", upload.single("activityAsset"), async (req, res) => {
-  console.log("gay");
   const { header, description, activityId, index } = req.body;
   let path;
   const { filename } = req.file;

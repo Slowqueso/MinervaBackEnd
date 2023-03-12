@@ -18,8 +18,6 @@ const AddToParticipatedActivity = (activityId, userId, role) => {
     (err, data) => {
       if (err) {
         console.log(err);
-      } else {
-        console.log("User updated");
       }
     }
   );

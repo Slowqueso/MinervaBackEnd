@@ -28,6 +28,7 @@ Router.get("/get-all", async (req, res) => {
       difficulty_level: activity.difficulty_level,
       owner: activity.owner.ID,
       join_price: activity.join_price,
+      public_ID: activity.public_ID,
     });
   });
   res.status(200).json({ activities });
@@ -36,12 +37,13 @@ Router.get("/get-all", async (req, res) => {
 Router.get("/get-one", async (req, res) => {
   const activityId = req.headers["x-activity-id"];
   try {
-    const activity = await ActivitySchema.findOne({ _id: activityId });
+    const activity = await ActivitySchema.findOne({ public_ID: activityId });
     if (activity) {
       const owner = await UserSchema.findOne({ _id: activity.owner.ID });
       return res.status(200).json({
         activity: {
           id: activity._id,
+          public_ID: activity.public_ID,
           title: activity.activity_title,
           desc: activity.activity_desc,
           tags: activity.category_tags,
@@ -70,7 +72,6 @@ Router.get("/get-one", async (req, res) => {
                   };base64,${owner.profile_pic.data.toString("base64")}`
                 : null,
           },
-          username: owner.username,
           join_price: activity.join_price,
         },
       });
@@ -82,6 +83,22 @@ Router.get("/get-one", async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ status: "error", msg: "Error Occured" });
+  }
+});
+
+Router.get("/get-public-id/:activityId", async (req, res) => {
+  const activityId = req.params.activityId;
+  try {
+    const activity = await ActivitySchema.findOne({ _id: activityId });
+    if (activity) {
+      return res.status(200).json({ public_ID: activity.public_ID });
+    } else {
+      return res
+        .status(404)
+        .json({ status: "error", msg: "Activity Not Found" });
+    }
+  } catch (error) {
+    res.status(500).json({ status: "error", msg: "Error Occured" });
   }
 });
 

@@ -15,7 +15,7 @@ Router.put("/join-activity", async (req, res) => {
        * Add credit score validation and push member into activity
        */
       const activity = await ActivitySchema.updateOne(
-        { _id: activityId },
+        { public_ID: activityId },
         {
           $push: {
             members: {

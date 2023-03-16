@@ -16,7 +16,7 @@ Router.post("/commented", async (req, res) => {
         if (id) {
             const activity = (await ActivitySchema.findOneAndUpdate(
                 { _id: activityId, 'comments.user_id': { $ne: id } },
-                { $addToSet: { comments: { user_id: id, time: new Date(), comment: comment } } },
+                { $addToSet: { comments: { user_id: id, comment: comment } } },
                 { returnOriginal: false }
                 ));
             if (activity) {

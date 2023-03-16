@@ -2,6 +2,7 @@ import express from "express";
 const Router = express.Router();
 import UserSchema from "../../../models/UserSchema.js";
 import ActivitySchema from "../../../models/ActivitySchema.js";
+import jwt from "jsonwebtoken";
 
 Router.get("/get-all", async (req, res) => {
   const query = await ActivitySchema.find({ _status: { $gt: 2 } }).sort({
@@ -101,5 +102,67 @@ Router.get("/get-public-id/:activityId", async (req, res) => {
     res.status(500).json({ status: "error", msg: "Error Occured" });
   }
 });
+
+Router.get("/toggle-status", async (req, res) => {
+  const activityId = req.headers["x-activity-id"];
+  const token = req.headers["x-access-token"];
+  try {
+    const decoded = jwt.decode(token, process.env.SECRET_KEY);
+    const { id } = decoded;
+
+    if(id){
+      const owner = await ActivitySchema.findOne({_id: activityId},{owner: 1});
+      if(owner.owner.ID === id){
+        const status = await ActivitySchema.findOne({_id: activityId},{isOpen: 1,_id:0});
+        ActivitySchema.findOneAndUpdate({_id: activityId},{$set: {isOpen: !status.isOpen}})
+        .then(() => {
+          return res.status(200).json({status: "success", msg: "Status Updated"});
+        })
+        .catch((err) => {
+          console.log(err);
+          return res.status(500).json({status: "error", msg: "Error Occured"});
+        });
+      }else{
+        return res.status(403).json({status: "error", msg: "Unauthorized"});
+      }
+    }else{
+      return res.status(403).json({status: "error", msg: "Unauthorized"});
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({status: "error", msg: "Error Occured"});
+  }
+});
+
+
+Router.get("/info/:tags", async (req, res) => {
+  const { tags } = req.params;
+  const id = req.headers["x-activity-id"];
+  try {
+    
+    if (id) {
+      const user = await ActivitySchema.findOne({ _id: id }, { [tags]: 1 });
+      if (user) {
+        return res.status(200).json({
+          [tags]: user[tags],
+        });
+      } else {
+        return res.status(400).json({
+          msg: "User Does not exist",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        msg: "User Does not exist",
+      });
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(400).json({
+      msg: "Token Does not exist",
+    });
+  }
+});
+
 
 export default Router;

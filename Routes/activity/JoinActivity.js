@@ -7,15 +7,14 @@ import AddToParticipatedActivity from "../../utils/AddToParticipatedActivity.js"
 
 Router.put("/join-activity", async (req, res) => {
   const { activityId, registeredAddress, userId } = req.body;
-  console.log(req.body);
   try {
     if (userId) {
       const user = await UserSchema.findOne({ _id: userId });
       /**
        * Add credit score validation and push member into activity
        */
-      const activity = await ActivitySchema.updateOne(
-        { public_ID: activityId },
+      const activity = await ActivitySchema.findOneAndUpdate(
+        { _id: activityId },
         {
           $push: {
             members: {

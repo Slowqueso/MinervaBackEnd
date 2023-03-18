@@ -82,7 +82,7 @@ Router.post("/joinaccepted", async (req, res) => {
             $addToSet: {
               join_accepted: {
                 user_id: userId,
-                time: new Date(),
+                
               },
             },
           },

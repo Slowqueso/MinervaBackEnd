@@ -15,7 +15,7 @@ Router.post("/donated", async (req, res) => {
         if (id) {
             const activity = (await ActivitySchema.findOneAndUpdate(
                 { _id: activityId, 'donations.user_id': { $ne: id } },
-                {$addToSet: { donations: { user_id: id, time: new Date(), amount: amount } } },
+                {$addToSet: { donations: { user_id: id, amount: amount } } },
                 { returnOriginal: false }
                 ));
             if (activity) {

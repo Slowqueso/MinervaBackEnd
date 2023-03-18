@@ -16,7 +16,7 @@ Router.post("/viewed", async (req, res) => {
         if (id) {
             const activity = (await ActivitySchema.findOneAndUpdate(
                 { _id: activityId, 'views.user_id': { $ne: id } },
-                { $addToSet: { views: { user_id: id, time: new Date() } } },
+                { $addToSet: { views: { user_id: id } } },
                 { returnOriginal: false }
               ));
             if (activity) {

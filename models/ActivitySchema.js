@@ -86,6 +86,7 @@ const ActivitySchema = mongoose.Schema({
       },
       time: {
         type: Date,
+        default: Date.now,
       },
     },
   ],
@@ -119,6 +120,7 @@ const ActivitySchema = mongoose.Schema({
       },
       time: {
         type: Date,
+        default: Date.now,
       },
     },
   ],
@@ -135,6 +137,7 @@ const ActivitySchema = mongoose.Schema({
       },
       time: {
         type: Date,
+        default: Date.now,
       },
     },
   ],
@@ -164,9 +167,14 @@ const ActivitySchema = mongoose.Schema({
       },
       time: {
         type: Date,
+        default: Date.now,
       },
     },
   ],
+  isOpen: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 export default mongoose.model("Activities", ActivitySchema);

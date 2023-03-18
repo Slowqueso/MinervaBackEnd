@@ -14,7 +14,7 @@ Router.post("/upvoted", async (req, res) => {
         if (id) {
             const activity = (await ActivitySchema.findOneAndUpdate(
                 { _id: activityId, 'upvotes.user_id': { $ne: id } },
-                { $addToSet: { upvotes: { user_id: id, time: new Date() } } },
+                { $addToSet: { upvotes: { user_id: id } } },
                 { returnOriginal: false }
                 ));
             if (activity) {

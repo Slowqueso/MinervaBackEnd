@@ -7,6 +7,7 @@ import AddToParticipatedActivity from "../../utils/AddToParticipatedActivity.js"
 
 Router.put("/join-activity", async (req, res) => {
   const { activityId, registeredAddress, userId } = req.body;
+  console.log(activityId);
   try {
     if (userId) {
       const user = await UserSchema.findOne({ _id: userId });

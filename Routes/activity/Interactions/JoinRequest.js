@@ -97,7 +97,7 @@ Router.post("/joinaccepted", async (req, res) => {
                 notifications: {
                   notification_title: `Your request has been accepted`,
                   notification_description: `You have been accepted to join activity ${accepted.activity_title}`,
-                  
+                  activityId: accepted.public_ID,
                 },
               },
             }
@@ -200,4 +200,5 @@ Router.post("/displayjoinrequests", async (req, res) => {
     res.status(400).send("error");
   }
 });
+
 export default Router;

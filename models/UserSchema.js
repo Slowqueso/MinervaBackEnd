@@ -123,6 +123,7 @@ const UserScehma = mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      activityId: Number,
     },
   ],
   

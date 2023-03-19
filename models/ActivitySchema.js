@@ -175,6 +175,17 @@ const ActivitySchema = mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  connections: [
+    {
+      _id: false,
+      link:String,
+      app_name:String,
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 export default mongoose.model("Activities", ActivitySchema);

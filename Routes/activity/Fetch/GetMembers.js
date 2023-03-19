@@ -31,7 +31,7 @@ Router.get("/get-members/:activityPUID", async (req, res) => {
         return {
           username: user.username,
           wallet_ID: user.wallet_ID._address,
-          user_id: user._id,
+          // user_id: user._id,
           date_of_join: member.date_of_join,
           profile_pic: profile_picture,
         };

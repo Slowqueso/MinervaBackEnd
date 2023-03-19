@@ -164,7 +164,67 @@ Router.get("/info/:tags", async (req, res) => {
   }
 });
 
+Router.post("/add-connections", async (req, res) => {
+  const { link,app_name } = req.body;
+  const id = req.headers["x-activity-id"];
+  try {
+    if (id) {
+      const response = await ActivitySchema.findOneAndUpdate(
+        { public_ID: id },
+        { $push: { connections: {
+          link: link,
+          app_name: app_name
+        } } }
+      );
+      if (response) {
+        return res.status(200).json({
+          msg: "Connections Added",
+        });
+      } else {
+        return res.status(400).json({
+          msg: "Error Occured",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        msg: "Activity does not exist",
+      });
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(400).json({
+      msg: "Something went wrong",
+    });
+  }
+});
 
+Router.get("/get-connections", async (req, res) => {
+  const id = req.headers["x-activity-id"];
+  try {
+    if (id) {
+      const response = await ActivitySchema.findOne({ public_ID: id }, {_id:0, connections: 1 });
+
+      if (response) {
+        return res.status(200).json({
+          connections: response.connections,
+        });
+      } else {
+        return res.status(400).json({
+          msg: "Error Occured",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        msg: "Activity does not exist",
+      });
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(400).json({
+      msg: "Something went wrong",
+    });
+  }
+});
 
 
 export default Router;

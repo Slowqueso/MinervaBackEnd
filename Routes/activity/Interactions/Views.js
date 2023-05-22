@@ -24,7 +24,7 @@ Router.post("/viewed", async (req, res) => {
                     msg: "Activity viewed",
                 });
             } else {
-                res.status(400).json({ msg: "View already exists for user ${id}" });
+                res.status(200).json({ msg: "View already exists for user ${id}" });
             }
         } else {
             res.status(400).json({ msg: "Invalid Token" });

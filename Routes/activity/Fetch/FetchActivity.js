@@ -74,6 +74,7 @@ Router.get("/get-one", async (req, res) => {
                 : null,
           },
           join_price: activity.join_price,
+          join_requests: activity.join_requests,
         },
       });
     } else {

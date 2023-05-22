@@ -45,8 +45,8 @@ Router.post("/joinrequest", async (req, res) => {
           });
         } else {
           res
-            .status(400)
-            .json({ msg: `Join request already exists for user ${id}` });
+            .status(200)
+            .json({ msg: `Join request already exists for user ${user.first_name + " " + user.last_name}` });
         }
       } else {
         res.status(400).json({ msg: `Member limit reached` });

@@ -1,4 +1,5 @@
-activity-uploads
+.env
+node_modulesactivity-uploads
 # Logs
 logs
 *.log

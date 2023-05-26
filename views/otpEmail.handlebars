@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap");
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin: 0px;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            margin: 0px;
+            padding: 0px;
+            border: 1px solid red;
+        }
+
+        section {
+            padding: 2rem;
+            width: 750px;
+            margin: auto;
+            background-color: #1c1c1c;
+        }
+
+        .header {
+            margin: 0px;
+            font-family: 'Cinzel', serif;
+            font-size: 30px;
+            font-weight: 200;
+            background: linear-gradient(90deg, #D47AFF -22%, #FF78BD 1.66%, #FFFBFC 41.22%, #FF79E2 50.33%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            font-weight: 400;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 2rem;
+        }
+
+        p {
+            font-family: 'Poppins', sans-serif;
+            color: #e2e2e2;
+            font-weight: 100;
+            font-size: 14px;
+            margin-bottom: 2rem;
+        }
+
+        p.span {
+            font-weight: 800;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            color: white;
+        }
+
+        p.footr {
+            font-size: 11px;
+            color: #8e8e8e;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <h1 class="header">Minerva</h1>
+        <h3>Password Reset Request Code: {{otp}}</h3>
+        <p>
+            Hi {{username}},
+            <br>
+            <br>
+            <b>{{otp}}</b>&nbsp;is your Minerva Password Reset request code for {{username}}.
+            <br>
+            <br>
+            <br>
+            <p>Enter the above code into the OTP verification screen to finish Password reset process. This code will
+            expire in 5 minutes.</p>
+            <br>
+            <br><br>
+            <p>Thank You,<br>
+            <span><b>The Minerva Team</b></span></p>
+        </p>
+        <p class="footr">If you did not request to change your password, you can ignore this email and your password will not be changed.</p>
+    </section>
+</body>
+
+</html>

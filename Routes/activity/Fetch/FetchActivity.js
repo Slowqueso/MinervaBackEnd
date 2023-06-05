@@ -15,9 +15,10 @@ Router.get("/get-all", async (req, res) => {
       title: activity.activity_title,
       desc: activity.activity_desc,
       tags: activity.category_tags,
-      logo: `data:image/${
-        activity.activity_logo.contentType
-      };base64,${activity.activity_logo.data.toString("base64")}`,
+      logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
+      // `data:image/${
+      //   activity.activity_logo.contentType
+      // };base64,${activity.activity_logo.data.toString("base64")}`,
       members: activity.members,
       isVerified: activity.isVerified,
       upVotes: activity.upvotes,
@@ -40,6 +41,13 @@ Router.get("/get-one", async (req, res) => {
   try {
     const activity = await ActivitySchema.findOne({ public_ID: activityId });
     if (activity) {
+      if (activity.overview_contents) {
+        activity.overview_contents.map((field) => {
+          if (field.imageFile) {
+            field.imageFile = `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityOverview/${field.imageFile}`;
+          }
+        });
+      }
       const owner = await UserSchema.findOne({ _id: activity.owner.ID });
       return res.status(200).json({
         activity: {
@@ -49,9 +57,10 @@ Router.get("/get-one", async (req, res) => {
           desc: activity.activity_desc,
           tags: activity.category_tags,
           member_limit: activity.member_limit,
-          logo: `data:image/${
-            activity.activity_logo.contentType
-          };base64,${activity.activity_logo.data.toString("base64")}`,
+          logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
+          // `data:image/${
+          //   activity.activity_logo.contentType
+          // };base64,${activity.activity_logo.data.toString("base64")}`,
           members: activity.members,
           isVerified: activity.isVerified,
           upVotes: activity.upvotes,
@@ -66,12 +75,9 @@ Router.get("/get-one", async (req, res) => {
           owner: {
             id: activity.owner.ID,
             username: owner.username,
-            profile_pic:
-              owner.profile_pic.contentType && owner.profile_pic.data
-                ? `data:image/${
-                    owner.profile_pic.contentType
-                  };base64,${owner.profile_pic.data.toString("base64")}`
-                : null,
+            profile_pic: owner.profile_pic
+              ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${owner.profile_pic}`
+              : null,
           },
           join_price: activity.join_price,
           join_requests: activity.join_requests,

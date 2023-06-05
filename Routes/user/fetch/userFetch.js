@@ -42,7 +42,7 @@ Router.get("/info", async (req, res) => {
     if (id) {
       const user = await UserSchema.findOne({ _id: id });
       if (user) {
-        if (user.profile_pic.data && user.profile_pic.contentType) {
+        if (user.profile_pic) {
           return res.status(200).json({
             authenticated: true,
             user: {
@@ -50,9 +50,7 @@ Router.get("/info", async (req, res) => {
               username: user.username,
               email: user.email,
               credit_score: user.credit_score,
-              profile_pic: `data:image/${
-                user.profile_pic.contentType
-              };base64,${user.profile_pic.data.toString("base64")}`,
+              profile_pic: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`,
               address: user.address,
               occupation: user.occupation,
               public_ID: user.public_ID,
@@ -174,10 +172,8 @@ Router.get("/get-profile-by-puid/:uid", async (req, res) => {
     );
 
     if (user) {
-      const profile_pic = user.profile_pic.contentType
-        ? `data:image/${
-            user.profile_pic.contentType
-          };base64,${user.profile_pic.data.toString("base64")}`
+      const profile_pic = user.profile_pic
+        ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`
         : null;
       return res.status(200).json({
         user: {
@@ -203,10 +199,8 @@ Router.post("/get-profile-by-wallet", async (req, res) => {
     if (user) {
       const newUser=[]
       user.forEach((element) => {
-        const profile_pic = element.profile_pic.contentType
-          ? `data:image/${
-              element.profile_pic.contentType
-            };base64,${element.profile_pic.data.toString("base64")}`
+        const profile_pic = element.profile_pic
+          ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${element.profile_pic}`
           : null;
         newUser.push({
           username: element.username,

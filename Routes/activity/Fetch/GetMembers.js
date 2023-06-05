@@ -23,10 +23,8 @@ Router.get("/get-members/:activityPUID", async (req, res) => {
             profile_pic: 1,
           }
         );
-        const profile_picture = user.profile_pic.data
-          ? `data:image/${
-              user.profile_pic.contentType
-            };base64,${user.profile_pic.data.toString("base64")}`
+        const profile_picture = user.profile_pic
+          ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`
           : null;
         return {
           username: user.username,

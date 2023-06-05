@@ -27,6 +27,16 @@ Router.put("/join-activity", async (req, res) => {
           },
         }
       );
+      await UserSchema.findOneAndUpdate(
+        { _id: userId , "activities_participated_in.activityId": activityId},
+        {
+          $pull: {
+            activities_participated_in: {
+              activityID: activity._id,
+            },
+          },
+        }
+      );
       AddToParticipatedActivity(activity._id, userId, 2);
       return res.status(204).json({ msg: "Member Added!" });
     } else {

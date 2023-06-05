@@ -41,8 +41,7 @@ const UserScehma = mongoose.Schema({
     house_address: String,
   },
   profile_pic: {
-    data: Buffer,
-    contentType: String,
+    type: String,
   },
   linkedProfiles: [
     {

@@ -8,34 +8,36 @@ import path from "path";
 import nodemailer from "nodemailer";
 import hbs from "nodemailer-express-handlebars";
 
-const __dirname = path.resolve(path.dirname(""));
+// const __dirname = path.resolve(path.dirname(""));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "pfp-uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      // Date.now().toString() +
-      file.originalname.split(".")[0] + "." + file.originalname.split(".").pop()
-    );
-  },
-});
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "pfp-uploads");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(
+//       null,
+//       // Date.now().toString() +
+//       file.originalname.split(".")[0] + "." + file.originalname.split(".").pop()
+//     );
+//   },
+// });
+// const fileFilter = (req, file, cb) => {
+//   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// };
+// const upload = multer({ storage: storage, fileFilter: fileFilter });
 
-Router.put("/register", upload.single("profileImage"), async (req, res) => {
+Router.put("/register", 
+// upload.single("profileImage"), 
+async (req, res) => {
   const token = req.headers["x-access-token"];
-  const { houseAddress, district, state, country, postalCode, occupation } =
+  const { houseAddress, district, state, country, postalCode, occupation,profilePic } =
     req.body;
-  const { filename } = req.file;
+  // const { filename } = req.file;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const { id } = decoded;
@@ -51,10 +53,11 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
             house_address: houseAddress,
           },
           occupation,
-          profile_pic: {
-            data: fs.readFileSync(__dirname + "/pfp-uploads/" + filename),
-            contentType: req.file.mimetype,
-          },
+          profile_pic: profilePic,
+          // {
+          //   data: fs.readFileSync(__dirname + "/pfp-uploads/" + filename),
+          //   contentType: req.file.mimetype,
+          // },
         },
       }
     );
@@ -93,12 +96,12 @@ Router.put("/register", upload.single("profileImage"), async (req, res) => {
     }
     main()
       .then((response) => {
-        fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
+        // fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
         return res.status(204).json({ msg: "User Information Added!" });
       })
       .catch(console.error);
   } catch (err) {
-    fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
+    // fs.unlinkSync(__dirname + "/pfp-uploads/" + filename);
     console.log(err);
     res.status(400).json({ msg: "Some Error Occured" });
   }

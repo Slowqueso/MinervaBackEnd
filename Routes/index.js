@@ -29,6 +29,7 @@ import Donations from "./activity/Interactions/Donations.js";
 import GetMembers from "./activity/Fetch/GetMembers.js";
 import RegisterWallet from "./user/wallet/UserWalletRegistration.js";
 
+import imageUpload from "./aws/imageUpload.js";
 dotenv.config();
 const router = express.Router();
 
@@ -69,6 +70,8 @@ router.use("/activity", JoinResquest);
 router.use("/activity", Comments);
 router.use("/activity", Donations);
 router.use("/activity", GetMembers);
+
+router.use("/aws", imageUpload);
 
 router.use("/two-factor", TwoFactor);
 export default router;

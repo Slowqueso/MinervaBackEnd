@@ -15,25 +15,25 @@ import getOrderedDate from "../../../utils/dateParser.js";
 import hbs from "nodemailer-express-handlebars";
 import AddToParticipatedActivity from "../../../utils/AddToParticipatedActivity.js";
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "activity-uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      file.originalname.split(".")[0] + "." + file.originalname.split(".").pop()
-    );
-  },
-});
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "activity-uploads");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(
+//       null,
+//       file.originalname.split(".")[0] + "." + file.originalname.split(".").pop()
+//     );
+//   },
+// });
+// const fileFilter = (req, file, cb) => {
+//   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// };
+// const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 Router.get("/drafts/get-activity/:activityId", async (req, res) => {
   const id = req.params.activityId;
@@ -58,9 +58,10 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
             join_price: activity.join_price,
             durationPeriod: activity.duration_period,
             date_created: activity.date_created,
-            logo: `data:image/${
-              activity.activity_logo.contentType
-            };base64,${activity.activity_logo.data.toString("base64")}`,
+            logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`
+            // `data:image/${
+            //   activity.activity_logo.contentType
+            // };base64,${activity.activity_logo.data.toString("base64")}`,
           },
         });
       } else {
@@ -86,7 +87,7 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
 
 Router.post(
   "/create-activity/create-draft",
-  upload.single("activityLogo"),
+  // upload.single("activityLogo"),
   async (req, res) => {
     const token = req.headers["x-access-token"];
     const {
@@ -98,14 +99,16 @@ Router.post(
       joinPrice,
       categories,
       address,
+      activityLogo,
     } = req.body;
-    const { filename } = req.file;
+    // const { filename } = req.file;
     try {
       const decoded = jwt.decode(token, process.env.SECRET_KEY);
       const { id } = decoded;
       if (id) {
         const user = await UserSchema.findOne({ _id: id });
-        if (user && isLevelValid(parseInt(selectedLevel), user.credit_score)) {
+        
+        if (user && isLevelValid(parseInt(selectedLevel), parseInt(user.credit_score))) {
           if (!isPriceValid(parseInt(selectedLevel), parseInt(joinPrice))) {
             return res.status(500).json({
               msg: "ETH Limit Exceeded for the level!",
@@ -120,12 +123,13 @@ Router.post(
               activity_title: title,
               activity_desc: description,
               category_tags: categories,
-              activity_logo: {
-                data: fs.readFileSync(
-                  __dirname + "/activity-uploads/" + filename
-                ),
-                contentType: req.file.mimetype,
-              },
+              activity_logo: activityLogo,
+              // {
+              //   data: fs.readFileSync(
+              //     __dirname + "/activity-uploads/" + filename
+              //   ),
+              //   contentType: req.file.mimetype,
+              // },
               member_limit: memberLimit,
               _status: 1,
               difficulty_level: selectedLevel,
@@ -142,6 +146,7 @@ Router.post(
             async (err, activity) => {
               if (err) {
                 if (err.code === 11000) {
+                  console.log(err)
                   return res.status(500).json({
                     status: "error",
                     msg: "Activity with same title already exists!",
@@ -157,7 +162,7 @@ Router.post(
 
               if (activity) {
                 AddToParticipatedActivity(activity._id, user._id, 1);
-                fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 async function main() {
                   let transporter = nodemailer.createTransport({
                     service: "Gmail",
@@ -184,11 +189,12 @@ Router.post(
                       date_created: getOrderedDate(activity.date_created),
                       activity_title: activity.activity_title,
                       activity_desc: activity.activity_desc,
-                      activity_logo: `data:image/${
-                        activity.activity_logo.contentType
-                      };base64,${activity.activity_logo.data.toString(
-                        "base64"
-                      )}`,
+                      activity_logo: activityLogo,
+                      // `data:image/${
+                      //   activity.activity_logo.contentType
+                      // };base64,${activity.activity_logo.data.toString(
+                      //   "base64"
+                      // )}`,
                       member_limit: activity.member_limit,
                       joining_price: activity.join_price,
                       difficulty_level: activity.difficulty_level,
@@ -208,7 +214,7 @@ Router.post(
                   .status(201)
                   .json({ draftSaved: true, _id: activity._id });
               } else {
-                fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
                 return res.status(400).json({
                   status: "error",
                   msg: "Something Went Wrong, Please try again later",
@@ -217,6 +223,7 @@ Router.post(
             }
           );
         } else {
+          console.log();
           return res
             .status(400)
             .json({ status: "error", msg: "Not Enough Credit Score" });
@@ -253,7 +260,7 @@ Router.put("/upd-owner-address", async (req, res) => {
 
 Router.post(
   "/upd-activity/:activityId",
-  upload.single("activityLogo"),
+  // upload.single("activityLogo"),
   async (req, res) => {
     const activityId = req.params.activityId;
     const token = req.headers["x-access-token"];
@@ -279,13 +286,8 @@ Router.post(
     if (req.body.categories) {
       objForUpdate.category_tags = req.body.categories;
     }
-    if (req.file) {
-      objForUpdate.activity_logo = {
-        data: fs.readFileSync(
-          __dirname + "/activity-uploads/" + req.file.filename
-        ),
-        contentType: req.file.mimetype,
-      };
+    if (req.body.activityLogo) {
+      objForUpdate.activity_logo = req.body.activityLogo;
     }
 
     try {

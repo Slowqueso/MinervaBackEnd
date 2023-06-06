@@ -26,8 +26,7 @@ const ActivitySchema = mongoose.Schema({
   },
   category_tags: String,
   activity_logo: {
-    data: Buffer,
-    contentType: String,
+    type: String,
   },
   overview_contents: [
     {
@@ -154,8 +153,7 @@ const ActivitySchema = mongoose.Schema({
         type: Number,
       },
       profile_pic: {
-        data: Buffer,
-        contentType: String,
+        type: String,
       },
     },
   ],

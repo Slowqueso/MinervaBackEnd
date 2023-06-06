@@ -26,18 +26,26 @@ Router.get("/get-user-activities", async (req, res) => {
         _id: 1,
         activity_logo: 1,
         public_ID: 1,
+        _status: 1,
       }
     );
 
     const Activities = query.map((activity, index) => {
+      
       return {
         id: activity._id,
         title: activity.activity_title,
         public_ID: activity.public_ID,
-        activity_logo: `data:image/${
-          activity.activity_logo.contentType
-        };base64,${activity.activity_logo.data.toString("base64")}`,
-        role: activities_participated_in[index].activity_role,
+        activity_logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
+        // `data:image/${
+        //   activity.activity_logo.contentType
+        // };base64,${activity.activity_logo.data.toString("base64")}`,
+        role: activities_participated_in.find(
+          (activities) => activities.activityID === activity._id.toString()
+          ).activity_role,
+          // role: activities_participated_in[index].activity_role,
+        
+        status: activity._status,
       };
     });
     return res.json({ activities: Activities }).status(200);

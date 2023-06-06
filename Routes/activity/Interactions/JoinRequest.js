@@ -17,39 +17,48 @@ Router.post("/joinrequest", async (req, res) => {
         { _id: id },
         { profile_pic: 1, first_name: 1, last_name: 1, rep: 1 }
       );
-      const meberlimit = await ActivitySchema.findOne(
+      const memberlimit = await ActivitySchema.findOne(
         { _id: activityId },
-        { member_limit: 1, members: 1 }
+        { member_limit: 1, members: 1, isOpen: 1 }
       );
-      if (user && meberlimit.members.length <= meberlimit.member_limit) {
-        const join_request = {};
-        if (user.profile_pic.data && user.profile_pic.contentType) {
-          join_request.profile_pic = user.profile_pic;
-        }
+      if (memberlimit.isOpen) {
+        if (user && memberlimit.members.length <= memberlimit.member_limit) {
+          const join_request = {};
+          if (user.profile_pic) {
+            join_request.profile_pic = user.profile_pic;
+          }
 
-        join_request.user_id = id;
-        join_request.name = user.first_name + " " + user.last_name;
-        join_request.rep = user.rep;
-        const activity = await ActivitySchema.findOneAndUpdate(
-          { _id: activityId, "join_requests.user_id": { $ne: id } },
-          {
-            $addToSet: {
-              join_requests: join_request,
+          join_request.user_id = id;
+          join_request.name = user.first_name + " " + user.last_name;
+          join_request.rep = user.rep;
+          const activity = await ActivitySchema.findOneAndUpdate(
+            { _id: activityId, "join_requests.user_id": { $ne: id } },
+            {
+              $addToSet: {
+                join_requests: join_request,
+              },
             },
-          },
-          { returnOriginal: false }
-        );
-        if (activity) {
-          return res.status(200).json({
-            msg: "Activity join request sent",
-          });
+            { returnOriginal: false }
+          );
+          if (activity) {
+            AddToParticipatedActivity(activityId, id, 4);
+            return res.status(200).json({
+              msg: "Activity join request sent",
+            });
+          } else {
+            res
+              .status(200)
+              .json({
+                msg: `Join request already exists for user ${
+                  user.first_name + " " + user.last_name
+                }`,
+              });
+          }
         } else {
-          res
-            .status(400)
-            .json({ msg: `Join request already exists for user ${id}` });
+          res.status(400).json({ msg: `Member limit reached` });
         }
       } else {
-        res.status(400).json({ msg: `Member limit reached` });
+        res.status(400).json({ msg: `Activity is closed` });
       }
     } else {
       res.status(400).json({ msg: "Invalid Token" });
@@ -75,14 +84,12 @@ Router.post("/joinaccepted", async (req, res) => {
         { returnOriginal: false }
       );
       if (request_removed) {
-        
         const accepted = await ActivitySchema.findOneAndUpdate(
           { _id: activityId, "join_accepted.user_id": { $ne: userId } },
           {
             $addToSet: {
               join_accepted: {
                 user_id: userId,
-                
               },
             },
           },
@@ -136,6 +143,16 @@ Router.post("/joinrejected", async (req, res) => {
         { returnOriginal: false }
       );
       if (request_removed) {
+        await UserSchema.findOneAndUpdate(
+          { _id: userId, "activities_participated_in.activityId": activityId },
+          {
+            $pull: {
+              activities_participated_in: {
+                activityID: activityId,
+              },
+            },
+          }
+        );
         return res.status(200).json({
           msg: "Activity join request rejected",
         });
@@ -167,17 +184,14 @@ Router.post("/displayjoinrequests", async (req, res) => {
       if (activity) {
         const response = [];
         activity.join_requests.forEach((request) => {
-          if (request.profile_pic.data && request.profile_pic.contentType) {
+          if (request.profile_pic) {
             response.push({
               user_id: request.user_id,
               name: request.name,
               rep: request.rep,
-              profile_pic: `data:image/${
-                request.profile_pic.contentType
-              };base64,${request.profile_pic.data.toString("base64")}`,
+              profile_pic: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${request.profile_pic}`,
             });
-          }
-          else{
+          } else {
             response.push({
               user_id: request.user_id,
               name: request.name,

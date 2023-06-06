@@ -4,30 +4,30 @@ import ActivitySchema from "../../models/ActivitySchema.js";
 import multer from "multer";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
-const __dirname = path.resolve(path.dirname(""));
+// const __dirname = path.resolve(path.dirname(""));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "activity-uploads");
-  },
-  filename: async (req, file, cb) => {
-    cb(
-      null,
-      uuidv4() +
-        file.originalname.split(".")[0] +
-        "." +
-        file.originalname.split(".").pop()
-    );
-  },
-});
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-};
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "activity-uploads");
+//   },
+//   filename: async (req, file, cb) => {
+//     cb(
+//       null,
+//       uuidv4() +
+//         file.originalname.split(".")[0] +
+//         "." +
+//         file.originalname.split(".").pop()
+//     );
+//   },
+// });
+// const fileFilter = (req, file, cb) => {
+//   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// };
+// const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 Router.put("/add-fields", async (req, res) => {
   const { header, description, id, index } = req.body;
@@ -56,13 +56,15 @@ Router.put("/add-fields", async (req, res) => {
   }
 });
 
-Router.post("/add-fields", upload.single("activityAsset"), async (req, res) => {
-  const { header, description, activityId, index } = req.body;
-  let path;
-  const { filename } = req.file;
-  if (req.file) {
-    path = req.file.path;
-  }
+Router.post("/add-fields",
+//  upload.single("activityAsset"), 
+ async (req, res) => {
+  const {activityAsset, header, description, activityId, index } = req.body;
+  // let path;
+  // const { filename } = req.file;
+  // if (req.file) {
+  //   path = req.file.path;
+  // }
   try {
     const activity = await ActivitySchema.updateOne(
       { _id: activityId },
@@ -71,7 +73,7 @@ Router.post("/add-fields", upload.single("activityAsset"), async (req, res) => {
           overview_contents: {
             fieldHeader: header,
             fieldDescription: description,
-            imageFile: "activity-uploads/" + filename,
+            imageFile: activityAsset,
             index: index,
           },
         },

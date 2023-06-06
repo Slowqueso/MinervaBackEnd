@@ -50,7 +50,7 @@ Router.get("/info", async (req, res) => {
         }
         if (walletAddress) {
           const wallet = walletAddress || user.wallet_ID;
-          if (wallet != "null") {
+          if (wallet != "null" && wallet && !isUserRegistered) {
             isUserRegistered = await contract.methods
               .isUserRegistered(wallet)
               .call({ from: accounts[0] });
@@ -60,8 +60,7 @@ Router.get("/info", async (req, res) => {
             await user.save();
           }
         }
-
-        if (user.profile_pic.data && user.profile_pic.contentType) {
+        if (user.profile_pic) {
           return res.status(200).json({
             authenticated: true,
             user: {
@@ -69,9 +68,7 @@ Router.get("/info", async (req, res) => {
               username: user.username,
               email: user.email,
               credit_score: user.credit_score,
-              profile_pic: `data:image/${
-                user.profile_pic.contentType
-              };base64,${user.profile_pic.data.toString("base64")}`,
+              profile_pic: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`,
               address: user.address,
               occupation: user.occupation,
               public_ID: user.public_ID,
@@ -93,10 +90,10 @@ Router.get("/info", async (req, res) => {
           });
         }
       } else {
-        res.status(400).json({ authenticated: false });
+        return res.status(400).json({ authenticated: false });
       }
     } else {
-      res.status(400).json({ msg: "Invalid Token" });
+      return res.status(400).json({ msg: "Invalid Token" });
     }
   } catch (error) {
     console.log(error);
@@ -195,9 +192,7 @@ Router.get("/get-profile-by-puid/:uid", async (req, res) => {
 
     if (user) {
       const profile_pic = user.profile_pic.contentType
-        ? `data:image/${
-            user.profile_pic.contentType
-          };base64,${user.profile_pic.data.toString("base64")}`
+        ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`
         : null;
       return res.status(200).json({
         user: {
@@ -297,7 +292,7 @@ Router.get("/get-no-of-notifications", async (req, res) => {
         },
       ];
       const notification = await UserSchema.aggregate(pipeline);
-      if (notification) {
+      if (notification.length > 0) {
         return res.status(200).json({
           count: notification[0].count,
         });

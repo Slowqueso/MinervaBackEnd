@@ -16,9 +16,6 @@ Router.get("/get-all", async (req, res) => {
       desc: activity.activity_desc,
       tags: activity.category_tags,
       logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
-      // `data:image/${
-      //   activity.activity_logo.contentType
-      // };base64,${activity.activity_logo.data.toString("base64")}`,
       members: activity.members,
       isVerified: activity.isVerified,
       upVotes: activity.upvotes,
@@ -58,9 +55,6 @@ Router.get("/get-one", async (req, res) => {
           tags: activity.category_tags,
           member_limit: activity.member_limit,
           logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
-          // `data:image/${
-          //   activity.activity_logo.contentType
-          // };base64,${activity.activity_logo.data.toString("base64")}`,
           members: activity.members,
           isVerified: activity.isVerified,
           upVotes: activity.upvotes,

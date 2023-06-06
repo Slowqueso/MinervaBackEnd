@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import UserSchema from "../../../models/UserSchema.js";
 import { isEmailCorrect, isContactCorrect } from "../../../utils/validation.js";
 import bcrypt from "bcryptjs";
-import { web3 } from "../../../configs/web3_connection.js";
+import { web3, accounts, contract } from "../../../configs/web3_connection.js";
 
 const generateToken = (id) => {
   const token = jwt.sign({ id }, process.env.SECRET_KEY, {
@@ -34,11 +34,6 @@ Router.post("/register", async (req, res) => {
         .status(400)
         .json({ msg: "Make sure Email and Contact are right!" });
     } else {
-      const contract = new web3.eth.Contract(
-        parsedABI,
-        process.env.MINERVA_CONTRACT_ADDRESS
-      );
-      const accounts = await web3.eth.getAccounts();
       const senderAddress = accounts[0];
 
       const userExist1 = await UserSchema.findOne({ email });

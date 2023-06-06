@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import UserSchema from "../../../models/UserSchema.js";
 import ActivitySchema from "../../../models/ActivitySchema.js";
 import { ObjectId } from "mongodb";
+import { web3, contract, accounts } from "../../../configs/web3_connection.js";
 
 Router.get("/info/:tags", async (req, res) => {
   const { tags } = req.params;
@@ -36,12 +37,30 @@ Router.get("/info/:tags", async (req, res) => {
 
 Router.get("/info", async (req, res) => {
   const token = req.headers["x-access-token"];
+  const walletAddress = req.headers["wallet-address"];
   try {
     const decoded = jwt.decode(token, process.env.SECRET_KEY);
     const { id } = decoded;
     if (id) {
       const user = await UserSchema.findOne({ _id: id });
       if (user) {
+        let isUserRegistered = false;
+        if (user.wallet_ID) {
+          isUserRegistered = true;
+        }
+        if (walletAddress) {
+          const wallet = walletAddress || user.wallet_ID;
+          if (wallet != "null") {
+            isUserRegistered = await contract.methods
+              .isUserRegistered(wallet)
+              .call({ from: accounts[0] });
+          }
+          if (isUserRegistered) {
+            user.wallet_ID = wallet;
+            await user.save();
+          }
+        }
+
         if (user.profile_pic.data && user.profile_pic.contentType) {
           return res.status(200).json({
             authenticated: true,
@@ -56,6 +75,7 @@ Router.get("/info", async (req, res) => {
               address: user.address,
               occupation: user.occupation,
               public_ID: user.public_ID,
+              isUserRegistered,
             },
           });
         } else {
@@ -195,13 +215,15 @@ Router.get("/get-profile-by-puid/:uid", async (req, res) => {
 });
 
 Router.post("/get-profile-by-wallet", async (req, res) => {
-
   var wallet = req.body.walletAddress;
 
   try {
-    const user = await UserSchema.find({ 'wallet_ID._address' : {$in:wallet} }, { username: 1,profile_pic:1, 'wallet_ID._address':1,_id:0})
+    const user = await UserSchema.find(
+      { "wallet_ID._address": { $in: wallet } },
+      { username: 1, profile_pic: 1, "wallet_ID._address": 1, _id: 0 }
+    );
     if (user) {
-      const newUser=[]
+      const newUser = [];
       user.forEach((element) => {
         const profile_pic = element.profile_pic.contentType
           ? `data:image/${
@@ -211,13 +233,12 @@ Router.post("/get-profile-by-wallet", async (req, res) => {
         newUser.push({
           username: element.username,
           profile_pic: profile_pic,
-          walletAddress: element.wallet_ID._address
-        })
+          walletAddress: element.wallet_ID._address,
+        });
       });
       return res.status(200).json({
         user: newUser,
       });
-      
     } else {
       return res.status(404).json({ msg: "User Does not exist" });
     }
@@ -233,15 +254,15 @@ Router.post("/get-all-notifications", async (req, res) => {
     const decoded = jwt.decode(token, process.env.SECRET_KEY);
     const { id } = decoded;
     if (id) {
-      const notifications = await UserSchema.find({ _id: id }, { notifications: 1 ,_id:0});
+      const notifications = await UserSchema.find(
+        { _id: id },
+        { notifications: 1, _id: 0 }
+      );
 
       if (notifications) {
-        
         return res.status(200).json({
           notifications: notifications[0].notifications,
-        }
-          
-        );
+        });
       } else {
         res.status(400).json({ authenticated: false });
       }
@@ -268,14 +289,13 @@ Router.get("/get-no-of-notifications", async (req, res) => {
         },
         {
           $project: {
-            _id:0,
+            _id: 0,
             count: {
               $size: "$notifications",
             },
-            
           },
         },
-      ]
+      ];
       const notification = await UserSchema.aggregate(pipeline);
       if (notification) {
         return res.status(200).json({
@@ -299,7 +319,10 @@ Router.post("/remove-notification", async (req, res) => {
     const decoded = jwt.decode(token, process.env.SECRET_KEY);
     const { id } = decoded;
     if (id) {
-      const response = await UserSchema.updateOne({ _id: id }, { $pull: { notifications: { _id: req.body.id } } });
+      const response = await UserSchema.updateOne(
+        { _id: id },
+        { $pull: { notifications: { _id: req.body.id } } }
+      );
       if (response) {
         return res.status(200).json({
           msg: "Notification Removed",
@@ -323,9 +346,11 @@ Router.post("/get-role", async (req, res) => {
     const decoded = jwt.decode(token, process.env.SECRET_KEY);
     const { id } = decoded;
     if (id) {
-      const activity = await ActivitySchema.findOne({ public_ID: activityId }, { _id: 1 });
+      const activity = await ActivitySchema.findOne(
+        { public_ID: activityId },
+        { _id: 1 }
+      );
       if (activity) {
-        
         const pipeline = [
           {
             $match: {
@@ -345,8 +370,7 @@ Router.post("/get-role", async (req, res) => {
           },
           {
             $match: {
-              "activities_participated_in.activityID":
-                activity._id.toString(),
+              "activities_participated_in.activityID": activity._id.toString(),
             },
           },
           {
@@ -354,12 +378,10 @@ Router.post("/get-role", async (req, res) => {
               role: "$activities_participated_in.activity_role",
             },
           },
-        ]
+        ];
         const role = await UserSchema.aggregate(pipeline);
         if (role) {
-          return res.status(200).json(
-           role[0],
-          );
+          return res.status(200).json(role[0]);
         } else {
           res.status(400).json({ authenticated: false });
         }

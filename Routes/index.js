@@ -27,6 +27,7 @@ import JoinResquest from "./activity/Interactions/JoinRequest.js";
 import Comments from "./activity/Interactions/Comments.js";
 import Donations from "./activity/Interactions/Donations.js";
 import GetMembers from "./activity/Fetch/GetMembers.js";
+import RegisterWallet from "./user/wallet/UserWalletRegistration.js";
 
 dotenv.config();
 const router = express.Router();
@@ -50,6 +51,7 @@ router.use("/user", FetchUser);
 router.use("/user", ResetPassword);
 router.use("/user", AddProfile);
 router.use("/user", DeleteUser);
+router.use("/user", RegisterWallet);
 
 router.use("/activity", CreateDraft);
 router.use("/activity", IncrementActivity);

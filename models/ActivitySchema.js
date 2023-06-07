@@ -176,8 +176,8 @@ const ActivitySchema = mongoose.Schema({
   connections: [
     {
       _id: false,
-      link:String,
-      app_name:String,
+      link: String,
+      app_name: String,
       date: {
         type: Date,
         default: Date.now,

@@ -138,6 +138,27 @@ const ActivitySchema = mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      past_comments: [
+        {
+          comment: {
+            type: String,
+          },
+          time: {
+            type: Date,
+          }, 
+          action: {
+            type: String,
+          },
+        }
+      ],
+      isRestricted: {
+        type: Boolean,
+        default: false,
+      },
+      isDeleted: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
   join_requests: [

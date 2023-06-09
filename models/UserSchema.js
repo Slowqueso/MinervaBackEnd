@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const UserScehma = mongoose.Schema({
   wallet_ID: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   google_ID: {
     type: String,
-    unique: true,
+    // unique: true,
   },
   public_ID: {
     unique: true,

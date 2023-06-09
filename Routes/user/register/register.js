@@ -42,9 +42,10 @@ Router.post("/register", async (req, res) => {
       if (userExist1 || userExist2) {
         return res.status(400).json({ msg: "User Already Exists" });
       }
-      const public_ID = await contract.methods
-        .getUserCount()
-        .call({ from: senderAddress });
+      // const public_ID = await contract.methods
+      //   .getUserCount()
+      //   .call({ from: senderAddress });
+      const public_ID = await UserSchema.count()+1;
       let newPassword;
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(password, salt, (err, hash) => {

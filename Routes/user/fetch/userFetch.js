@@ -209,6 +209,31 @@ Router.get("/get-profile-by-puid/:uid", async (req, res) => {
   }
 });
 
+Router.get("/get-profile-by-uid/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const user = await UserSchema.findOne(
+      { _id: uid },
+      { username: 1, profile_pic: 1 }
+    );
+
+    if (user) {
+      const profile_pic = user.profile_pic ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}` : null;
+      return res.status(200).json({
+        user: {
+          username: user.username,
+          profile_pic: profile_pic,
+        },
+      });
+    } else {
+      return res.status(404).json({ msg: "User does not exist" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "Internal Server Error" });
+  }
+});
+
 Router.post("/get-profile-by-wallet", async (req, res) => {
   var wallet = req.body.walletAddress;
 

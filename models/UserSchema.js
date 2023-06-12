@@ -3,15 +3,18 @@ import mongoose from "mongoose";
 const UserScehma = mongoose.Schema({
   wallet_ID: {
     type: String,
-    unique: true,
+    sparse: true,
+    required: false,
   },
   google_ID: {
     type: String,
-    unique: true,
+    sparse: true,
+    required: false,
   },
   public_ID: {
-    unique: true,
+    sparse: true,
     type: Number,
+    required: false,
   },
   email: {
     type: String,

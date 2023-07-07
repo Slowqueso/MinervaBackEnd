@@ -50,4 +50,23 @@ Router.get("/token", async (req, res) => {
     res.status(400).json({ msg: "Token Does not exist", authenticated: false });
   }
 });
+
+Router.get("/walletLogin", async (req, res) => {
+  const walletAddress = req.headers["x-wallet-address"];
+  
+  try {
+    const user = await UserSchema.findOne({ "wallet_ID._address": walletAddress });
+    
+    if (user) {
+      const token = generateToken(user._id);
+      return res.json({ status: "ok", user: token });
+    } else {
+      return res
+        .status(400)
+        .json({ status: "error", msg: "User Does not exist with this wallet" });
+    }
+  } catch (err) {
+    console.log(err)
+  }
+});
 export default Router;

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import UserSchema from "../../../models/UserSchema.js";
 import { isEmailCorrect, isContactCorrect } from "../../../utils/validation.js";
 import bcrypt from "bcryptjs";
+import { web3, accounts, contract } from "../../../configs/web3_connection.js";
 
 const generateToken = (id) => {
   const token = jwt.sign({ id }, process.env.SECRET_KEY, {
@@ -13,16 +14,10 @@ const generateToken = (id) => {
 };
 
 Router.post("/register", async (req, res) => {
-  const {
-    email,
-    password,
-    username,
-    fname,
-    lname,
-    contact,
-    walletAddress,
-    public_ID,
-  } = req.body;
+  // await Moralis.start({
+  //   apiKey: process.env.MORALIS_API_KEY,
+  // });
+  const { email, password, username, fname, lname, contact } = req.body;
   if (
     !email ||
     email === "" ||
@@ -30,8 +25,7 @@ Router.post("/register", async (req, res) => {
     !password ||
     !username ||
     !fname ||
-    !lname ||
-    !walletAddress
+    !lname
   ) {
     return res.status(400).json({ msg: "All fields are not entered" });
   } else {
@@ -40,16 +34,18 @@ Router.post("/register", async (req, res) => {
         .status(400)
         .json({ msg: "Make sure Email and Contact are right!" });
     } else {
+      const senderAddress = accounts[0];
+
       const userExist1 = await UserSchema.findOne({ email });
       const userExist2 = await UserSchema.findOne({ contact_number: contact });
-      const userExist3 = await UserSchema.findOne({
-        wallet_ID: { _address: walletAddress },
-      });
 
-      if (userExist1 || userExist2 || userExist3) {
+      if (userExist1 || userExist2) {
         return res.status(400).json({ msg: "User Already Exists" });
       }
-
+      // const public_ID = await contract.methods
+      //   .getUserCount()
+      //   .call({ from: senderAddress });
+      const public_ID = await UserSchema.count()+1;
       let newPassword;
       bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(password, salt, (err, hash) => {
@@ -63,10 +59,7 @@ Router.post("/register", async (req, res) => {
               username,
               first_name: fname,
               last_name: lname,
-              wallet_ID: {
-                _address: walletAddress,
-              },
-              public_ID,
+              public_ID: parseInt(public_ID),
             },
             async (err, user) => {
               if (err) {

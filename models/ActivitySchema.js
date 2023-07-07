@@ -138,6 +138,27 @@ const ActivitySchema = mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      past_comments: [
+        {
+          comment: {
+            type: String,
+          },
+          time: {
+            type: Date,
+          }, 
+          action: {
+            type: String,
+          },
+        }
+      ],
+      isRestricted: {
+        type: Boolean,
+        default: false,
+      },
+      isDeleted: {
+        type: Boolean,
+        default: false,
+      },
     },
   ],
   join_requests: [
@@ -176,8 +197,8 @@ const ActivitySchema = mongoose.Schema({
   connections: [
     {
       _id: false,
-      link:String,
-      app_name:String,
+      link: String,
+      app_name: String,
       date: {
         type: Date,
         default: Date.now,

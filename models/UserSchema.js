@@ -2,35 +2,39 @@ import mongoose from "mongoose";
 
 const UserScehma = mongoose.Schema({
   wallet_ID: {
-    _address: String,
-    _date: {
-      type: Date,
-      default: Date.now,
-    },
+    type: String,
+    sparse: true,
+    required: false,
+  },
+  google_ID: {
+    type: String,
+    sparse: true,
+    required: false,
   },
   public_ID: {
-    unique: true,
+    sparse: true,
     type: Number,
+    required: false,
   },
   email: {
     type: String,
-    required: true,
     unique: true,
   },
   contact_number: {
     type: String,
     unique: true,
-    required: false,
+  },
+  date_of_registration: {
+    type: Date,
+    default: Date.now,
   },
   password: {
     type: String,
-    required: true,
   },
   first_name: String,
   last_name: String,
   username: {
     type: String,
-    required: true,
     unique: false,
   },
   address: {
@@ -71,9 +75,6 @@ const UserScehma = mongoose.Schema({
     type: Number,
     default: 100,
   },
-  age: {
-    type: Number,
-  },
   date_of_birth: {
     day: Number,
     month: String,
@@ -105,12 +106,11 @@ const UserScehma = mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  rep:{
+  rep: {
     type: Number,
   },
   notifications: [
     {
-      
       // notification_type: Number,
       notification_title: String,
       notification_description: String,
@@ -125,7 +125,6 @@ const UserScehma = mongoose.Schema({
       activityId: Number,
     },
   ],
-  
 });
 
 export default mongoose.model("WebUser", UserScehma);

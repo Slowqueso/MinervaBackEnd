@@ -58,10 +58,8 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
             join_price: activity.join_price,
             durationPeriod: activity.duration_period,
             date_created: activity.date_created,
-            logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`
-            // `data:image/${
-            //   activity.activity_logo.contentType
-            // };base64,${activity.activity_logo.data.toString("base64")}`,
+            logo: `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/activityLogo/${activity.activity_logo}`,
+            public_ID: activity.public_ID,
           },
         });
       } else {
@@ -107,8 +105,11 @@ Router.post(
       const { id } = decoded;
       if (id) {
         const user = await UserSchema.findOne({ _id: id });
-        
-        if (user && isLevelValid(parseInt(selectedLevel), parseInt(user.credit_score))) {
+        const count = await ActivitySchema.count();
+        if (
+          user &&
+          isLevelValid(parseInt(selectedLevel), parseInt(user.credit_score))
+        ) {
           if (!isPriceValid(parseInt(selectedLevel), parseInt(joinPrice))) {
             return res.status(500).json({
               msg: "ETH Limit Exceeded for the level!",
@@ -120,6 +121,7 @@ Router.post(
               owner: {
                 ID: user._id,
               },
+              public_ID: count + 1,
               activity_title: title,
               activity_desc: description,
               category_tags: categories,
@@ -146,7 +148,7 @@ Router.post(
             async (err, activity) => {
               if (err) {
                 if (err.code === 11000) {
-                  console.log(err)
+                  console.log(err);
                   return res.status(500).json({
                     status: "error",
                     msg: "Activity with same title already exists!",

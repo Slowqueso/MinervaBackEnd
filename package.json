@@ -6,6 +6,7 @@
   "type": "module",
   "license": "MIT",
   "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.21.0",
     "aws-sdk": "^2.1381.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -14,11 +15,14 @@
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.5.4",
+    "moralis": "^2.21.0",
     "multer": "^1.4.5-lts.1",
+    "ngrok": "^5.0.0-beta.2",
     "nodemailer": "^6.7.8",
     "nodemailer-express-handlebars": "^5.0.0",
     "path": "^0.12.7",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "web3": "^1.10.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

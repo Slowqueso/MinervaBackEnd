@@ -64,8 +64,11 @@ Router.get("/drafts/get-activity/:activityId", async (req, res) => {
         });
       } else {
         return res
-          .status(500)
-          .json({ status: "error", msg: "You don't own this activity" });
+          .status(403)
+          .json({
+            status: "error",
+            msg: "Restricted Access to the information!",
+          });
       }
     } else {
       return res.status(404).json({
@@ -106,130 +109,120 @@ Router.post(
       if (id) {
         const user = await UserSchema.findOne({ _id: id });
         const count = await ActivitySchema.count();
-        if (
-          user &&
-          isLevelValid(parseInt(selectedLevel), parseInt(user.credit_score))
-        ) {
-          if (!isPriceValid(parseInt(selectedLevel), parseInt(joinPrice))) {
-            return res.status(500).json({
-              msg: "ETH Limit Exceeded for the level!",
-              status: "error",
-            });
-          }
-          ActivitySchema.create(
-            {
-              owner: {
-                ID: user._id,
-              },
-              public_ID: count + 1,
-              activity_title: title,
-              activity_desc: description,
-              category_tags: categories,
-              activity_logo: activityLogo,
-              // {
-              //   data: fs.readFileSync(
-              //     __dirname + "/activity-uploads/" + filename
-              //   ),
-              //   contentType: req.file.mimetype,
-              // },
-              member_limit: memberLimit,
-              _status: 1,
-              difficulty_level: selectedLevel,
-              duration_period: durationPeriod,
-              join_price: joinPrice,
-              members: [
-                {
-                  id: user._id,
-                  address: address,
-                  username: user.username,
-                },
-              ],
+        if (!isPriceValid(parseInt(selectedLevel), parseInt(joinPrice))) {
+          return res.status(500).json({
+            msg: "ETH Limit Exceeded for the level!",
+            status: "error",
+          });
+        }
+        ActivitySchema.create(
+          {
+            owner: {
+              ID: user._id,
             },
-            async (err, activity) => {
-              if (err) {
-                if (err.code === 11000) {
-                  console.log(err);
-                  return res.status(500).json({
-                    status: "error",
-                    msg: "Activity with same title already exists!",
-                  });
-                } else {
-                  console.log(err);
-                  return res.status(500).json({
-                    status: "error",
-                    msg: "Some Error Occured, Please try again later!",
-                  });
-                }
-              }
-
-              if (activity) {
-                AddToParticipatedActivity(activity._id, user._id, 1);
-                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
-                async function main() {
-                  let transporter = nodemailer.createTransport({
-                    service: "Gmail",
-                    secure: false,
-                    auth: {
-                      user: process.env.EMAIL,
-                      pass: process.env.PASSWORD_MAIL,
-                    },
-                  });
-                  const handlebarOptions = {
-                    viewEngine: {
-                      partialsDir: path.resolve("./views/"),
-                      defaultLayout: false,
-                    },
-                    viewPath: path.resolve("./views/"),
-                  };
-                  transporter.use("compile", hbs(handlebarOptions));
-                  const mailOptions = {
-                    from: `"Minerva" <${process.env.EMAIL}>`, // sender address
-                    to: `${user.email}`,
-                    subject: "New Activity Draft has been created :D",
-                    template: "ActivityDraft",
-                    context: {
-                      date_created: getOrderedDate(activity.date_created),
-                      activity_title: activity.activity_title,
-                      activity_desc: activity.activity_desc,
-                      activity_logo: activityLogo,
-                      // `data:image/${
-                      //   activity.activity_logo.contentType
-                      // };base64,${activity.activity_logo.data.toString(
-                      //   "base64"
-                      // )}`,
-                      member_limit: activity.member_limit,
-                      joining_price: activity.join_price,
-                      difficulty_level: activity.difficulty_level,
-                      duration_period: activity.duration_period,
-                      email: user.email,
-                    },
-                  };
-                  transporter.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                      return res.status(500);
-                    }
-                  });
-                }
-                await main();
-                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
-                return res
-                  .status(201)
-                  .json({ draftSaved: true, _id: activity._id });
-              } else {
-                // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
-                return res.status(400).json({
+            public_ID: count + 1,
+            activity_title: title,
+            activity_desc: description,
+            category_tags: categories,
+            activity_logo: activityLogo,
+            // {
+            //   data: fs.readFileSync(
+            //     __dirname + "/activity-uploads/" + filename
+            //   ),
+            //   contentType: req.file.mimetype,
+            // },
+            member_limit: memberLimit,
+            _status: 1,
+            difficulty_level: selectedLevel,
+            duration_period: durationPeriod,
+            join_price: joinPrice,
+            members: [
+              {
+                id: user._id,
+                address: address,
+                username: user.username,
+              },
+            ],
+          },
+          async (err, activity) => {
+            if (err) {
+              if (err.code === 11000) {
+                console.log(err);
+                return res.status(500).json({
                   status: "error",
-                  msg: "Something Went Wrong, Please try again later",
+                  msg: "Activity with same title already exists!",
+                });
+              } else {
+                console.log(err);
+                return res.status(500).json({
+                  status: "error",
+                  msg: "Some Error Occured, Please try again later!",
                 });
               }
             }
-          );
-        } else {
-          console.log();
-          return res
-            .status(400)
-            .json({ status: "error", msg: "Not Enough Credit Score" });
-        }
+
+            if (activity) {
+              AddToParticipatedActivity(activity._id, user._id, 1);
+              // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+              async function main() {
+                let transporter = nodemailer.createTransport({
+                  service: "Gmail",
+                  secure: false,
+                  auth: {
+                    user: process.env.EMAIL,
+                    pass: process.env.PASSWORD_MAIL,
+                  },
+                });
+                const handlebarOptions = {
+                  viewEngine: {
+                    partialsDir: path.resolve("./views/"),
+                    defaultLayout: false,
+                  },
+                  viewPath: path.resolve("./views/"),
+                };
+                transporter.use("compile", hbs(handlebarOptions));
+                const mailOptions = {
+                  from: `"Minerva" <${process.env.EMAIL}>`, // sender address
+                  to: `${user.email}`,
+                  subject: "New Activity Draft has been created :D",
+                  template: "ActivityDraft",
+                  context: {
+                    date_created: getOrderedDate(activity.date_created),
+                    activity_title: activity.activity_title,
+                    activity_desc: activity.activity_desc,
+                    activity_logo: activityLogo,
+                    // `data:image/${
+                    //   activity.activity_logo.contentType
+                    // };base64,${activity.activity_logo.data.toString(
+                    //   "base64"
+                    // )}`,
+                    member_limit: activity.member_limit,
+                    joining_price: activity.join_price,
+                    difficulty_level: activity.difficulty_level,
+                    duration_period: activity.duration_period,
+                    email: user.email,
+                  },
+                };
+                transporter.sendMail(mailOptions, function (error, info) {
+                  if (error) {
+                    return res.status(500);
+                  }
+                });
+              }
+              await main();
+              // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+              return res
+                .status(201)
+                .json({ draftSaved: true, _id: activity._id });
+            } else {
+              // fs.unlinkSync(__dirname + "/activity-uploads/" + filename);
+              return res.status(400).json({
+                status: "error",
+                msg: "Something Went Wrong, Please try again later",
+              });
+            }
+          }
+        );
       } else {
         return res.status(400).json({ status: "error", msg: "Invalid Token" });
       }
@@ -299,43 +292,32 @@ Router.post(
 
       if (activity && id) {
         const user = await UserSchema.findOne({ _id: id });
-
         if (
-          user &&
-          isLevelValid(
+          !isPriceValid(
             parseInt(objForUpdate.difficulty_level),
-            user.credit_score
+            parseInt(objForUpdate.join_price)
           )
         ) {
-          if (
-            !isPriceValid(
-              parseInt(objForUpdate.difficulty_level),
-              parseInt(objForUpdate.join_price)
-            )
-          ) {
-            return res.status(500).json({
-              msg: "ETH Limit Exceeded for the level!",
-              status: "error",
-            });
+          return res.status(500).json({
+            msg: "ETH Limit Exceeded for the level!",
+            status: "error",
+          });
+        }
+        const updatedActivity = await ActivitySchema.updateOne(
+          { _id: activityId },
+          {
+            $set: objForUpdate,
           }
-          const updatedActivity = await ActivitySchema.updateOne(
-            { _id: activityId },
-            {
-              $set: objForUpdate,
-            }
-          );
-          if (updatedActivity) {
-            if (req.file) {
-              fs.unlinkSync(
-                __dirname + "/activity-uploads/" + req.file.filename
-              );
-            }
-            return res.status(201).json({ draftSaved: true, _id: activityId });
-          } else {
-            return res
-              .status(500)
-              .json({ status: "error", msg: "Error Occured" });
+        );
+        if (updatedActivity) {
+          if (req.file) {
+            fs.unlinkSync(__dirname + "/activity-uploads/" + req.file.filename);
           }
+          return res.status(201).json({ draftSaved: true, _id: activityId });
+        } else {
+          return res
+            .status(500)
+            .json({ status: "error", msg: "Error Occured" });
         }
       }
     } catch (error) {

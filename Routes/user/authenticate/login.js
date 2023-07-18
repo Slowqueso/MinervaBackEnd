@@ -19,7 +19,11 @@ Router.put("/login", async (req, res) => {
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (isPasswordValid) {
         const token = generateToken(user._id);
-        return res.json({ status: "ok", user: token ,email_auth:user.email_auth});
+        return res.json({
+          status: "ok",
+          user: token,
+          email_auth: user.email_auth,
+        });
       } else {
         return res
           .status(400)
@@ -53,10 +57,10 @@ Router.get("/token", async (req, res) => {
 
 Router.get("/walletLogin", async (req, res) => {
   const walletAddress = req.headers["x-wallet-address"];
-  
+
   try {
-    const user = await UserSchema.findOne({ "wallet_ID._address": walletAddress });
-    
+    const user = await UserSchema.findOne({ wallet_ID: walletAddress });
+
     if (user) {
       const token = generateToken(user._id);
       return res.json({ status: "ok", user: token });
@@ -66,7 +70,7 @@ Router.get("/walletLogin", async (req, res) => {
         .json({ status: "error", msg: "User Does not exist with this wallet" });
     }
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
 });
 export default Router;

@@ -218,7 +218,9 @@ Router.get("/get-profile-by-uid/:uid", async (req, res) => {
     );
 
     if (user) {
-      const profile_pic = user.profile_pic ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}` : null;
+      const profile_pic = user.profile_pic
+        ? `https://${process.env.BUCKET_NAME}.s3.${process.env.REGION}.amazonaws.com/profilePic/${user.profile_pic}`
+        : null;
       return res.status(200).json({
         user: {
           username: user.username,
